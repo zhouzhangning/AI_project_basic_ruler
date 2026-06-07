@@ -50,10 +50,12 @@ $requiredFiles = @(
     "docs\ai-work-log.md",
     "docs\project-memory.md",
     "docs\evolution-rules.md",
+    "docs\sync-rules.md",
     "docs\maintenance-checklist.md",
     "docs\release-checklist.md",
     "docs\test-checklist.md",
     "scripts\init-ai-dev-system.ps1",
+    "scripts\update-ai-dev-system.ps1",
     "scripts\audit-ai-dev-system.ps1"
 )
 

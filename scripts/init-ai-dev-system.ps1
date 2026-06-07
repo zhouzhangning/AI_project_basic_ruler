@@ -18,7 +18,8 @@ $items = @(
     "README-AI.md",
     "docs",
     "prompts",
-    "scripts\audit-ai-dev-system.ps1"
+    "scripts\audit-ai-dev-system.ps1",
+    "scripts\update-ai-dev-system.ps1"
 )
 
 foreach ($item in $items) {

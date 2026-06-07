@@ -21,11 +21,13 @@
 - `docs/ai-work-log.md`：AI 工作日志
 - `docs/project-memory.md`：项目长期记忆
 - `docs/evolution-rules.md`：系统如何健康增长的规则
+- `docs/sync-rules.md`：家里/公司/多电脑同步更新规则
 - `docs/maintenance-checklist.md`：定期维护和清理清单
 - `docs/release-checklist.md`：发布检查清单
 - `docs/test-checklist.md`：测试检查清单
 - `prompts/`：常用提示词模板
 - `scripts/init-ai-dev-system.ps1`：把模板复制到目标项目的一键初始化脚本
+- `scripts/update-ai-dev-system.ps1`：拉取模板更新，并同步到目标项目
 - `scripts/audit-ai-dev-system.ps1`：检查模板完整性、文件大小和维护风险
 
 ## 快速使用
@@ -74,3 +76,20 @@ docs/maintenance-checklist.md
 ```powershell
 .\scripts\audit-ai-dev-system.ps1
 ```
+
+## 多电脑同步
+
+在家里或公司电脑使用时，先更新模板仓库：
+
+```powershell
+git pull
+.\scripts\audit-ai-dev-system.ps1
+```
+
+再同步到具体项目：
+
+```powershell
+.\scripts\update-ai-dev-system.ps1 -TargetPath "D:\path\to\your-project"
+```
+
+默认不会覆盖目标项目已有规则。需要强制覆盖时才使用 `-Overwrite`。
