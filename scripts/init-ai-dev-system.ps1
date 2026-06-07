@@ -17,7 +17,8 @@ $items = @(
     ".cursorrules",
     "README-AI.md",
     "docs",
-    "prompts"
+    "prompts",
+    "scripts\audit-ai-dev-system.ps1"
 )
 
 foreach ($item in $items) {
@@ -37,4 +38,3 @@ foreach ($item in $items) {
 }
 
 Write-Host "AI dev system initialized in $targetRoot"
-

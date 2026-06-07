@@ -20,10 +20,13 @@
 - `docs/ai-task-template.md`：AI 任务描述模板
 - `docs/ai-work-log.md`：AI 工作日志
 - `docs/project-memory.md`：项目长期记忆
+- `docs/evolution-rules.md`：系统如何健康增长的规则
+- `docs/maintenance-checklist.md`：定期维护和清理清单
 - `docs/release-checklist.md`：发布检查清单
 - `docs/test-checklist.md`：测试检查清单
 - `prompts/`：常用提示词模板
 - `scripts/init-ai-dev-system.ps1`：把模板复制到目标项目的一键初始化脚本
+- `scripts/audit-ai-dev-system.ps1`：检查模板完整性、文件大小和维护风险
 
 ## 快速使用
 
@@ -54,4 +57,20 @@
 - 低风险任务可以自动推进，高风险动作必须暂停审批。
 - 所有复杂任务都要有目标、范围、约束、验收和输出要求。
 - 重复出现的偏好写进规则，重复流程做成模板。
+- 通用规则只收跨项目共性，项目特例留在项目自己的规则里。
+- 系统要健康变大：新增规则必须说明用途、触发条件和维护位置。
 
+## 维护方式
+
+每次扩展本系统前，先阅读：
+
+```text
+docs/evolution-rules.md
+docs/maintenance-checklist.md
+```
+
+扩展后运行：
+
+```powershell
+.\scripts\audit-ai-dev-system.ps1
+```
