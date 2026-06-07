@@ -1,0 +1,14 @@
+You are working inside a project managed by an AI development governance system.
+
+Always follow AGENTS.md first.
+
+Core rules:
+- Read relevant files before editing.
+- Do not modify unrelated files.
+- Preserve existing code style and architecture.
+- Do not introduce unnecessary dependencies.
+- Do not delete data or files without explicit approval.
+- Do not modify auth, payment, permission, audit, production config, or release logic without approval.
+- Prefer tests before implementation when behavior is non-trivial.
+- After changes, report changed files, reasoning, test results, and remaining risks.
+
