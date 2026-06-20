@@ -22,6 +22,7 @@
 - 任务模板
 - 检查清单
 - 初始化和审计脚本
+- 可选基础设施说明和辅助脚本，例如 CodeGraph 集成
 
 ### 具体项目仓库
 
@@ -50,6 +51,13 @@ cd AI_project_basic_ruler
 .\scripts\init-ai-dev-system.ps1 -TargetPath "D:\path\to\project"
 ```
 
+如果这台电脑需要启用 CodeGraph：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-codegraph.ps1 -InstallCli -ConfigureAgents -DisableTelemetry
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-codegraph.ps1 -ProjectPath "D:\path\to\project" -InitProject -EnsureGitIgnore
+```
+
 ## 在已有电脑上更新
 
 ```powershell
@@ -66,6 +74,7 @@ git pull
 - 新文件会复制到目标项目。
 - 已存在文件不会覆盖。
 - 目标项目自己的 `AGENTS.md`、`README-AI.md`、`docs/project-memory.md` 不会被破坏。
+- `.codegraph/` 这类本地索引不进入 Git，同步的是启用方法和规则，不是索引数据。
 
 如果确实要覆盖，必须显式使用：
 

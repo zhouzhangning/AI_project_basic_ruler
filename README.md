@@ -20,8 +20,10 @@
 - `docs/ai-task-template.md`：AI 任务描述模板
 - `docs/ai-work-log.md`：AI 工作日志
 - `docs/project-memory.md`：项目长期记忆
+- `docs/feature-inventory.md`：基础设施功能清单
 - `docs/evolution-rules.md`：系统如何健康增长的规则
 - `docs/sync-rules.md`：家里/公司/多电脑同步更新规则
+- `docs/codegraph-integration.md`：CodeGraph 可选代码理解基础设施说明
 - `docs/maintenance-checklist.md`：定期维护和清理清单
 - `docs/release-checklist.md`：发布检查清单
 - `docs/test-checklist.md`：测试检查清单
@@ -29,6 +31,7 @@
 - `scripts/init-ai-dev-system.ps1`：把模板复制到目标项目的一键初始化脚本
 - `scripts/update-ai-dev-system.ps1`：拉取模板更新，并同步到目标项目
 - `scripts/audit-ai-dev-system.ps1`：检查模板完整性、文件大小和维护风险
+- `scripts/setup-codegraph.ps1`：检查、安装、配置和初始化 CodeGraph 的辅助脚本
 
 ## 快速使用
 
@@ -93,3 +96,17 @@ git pull
 ```
 
 默认不会覆盖目标项目已有规则。需要强制覆盖时才使用 `-Overwrite`。
+
+## CodeGraph 可选集成
+
+如需在新电脑上启用 CodeGraph 代码知识图谱：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-codegraph.ps1 -InstallCli -ConfigureAgents -DisableTelemetry
+```
+
+如需在具体项目中初始化 CodeGraph：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-codegraph.ps1 -ProjectPath "D:\path\to\your-project" -InitProject -EnsureGitIgnore
+```

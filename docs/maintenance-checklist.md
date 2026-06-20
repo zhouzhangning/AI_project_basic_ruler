@@ -25,6 +25,7 @@
 
 - [ ] `init-ai-dev-system.ps1` 能复制完整模板。
 - [ ] `audit-ai-dev-system.ps1` 能正常运行。
+- [ ] `setup-codegraph.ps1` 默认只检查状态，只有显式参数才修改环境或项目。
 - [ ] 脚本不执行破坏性动作。
 - [ ] 脚本默认不覆盖用户文件。
 

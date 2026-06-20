@@ -27,13 +27,15 @@ $items = @(
     ".cursorrules",
     "docs\ai-approval-rules.md",
     "docs\ai-task-template.md",
+    "docs\codegraph-integration.md",
     "docs\evolution-rules.md",
     "docs\maintenance-checklist.md",
     "docs\release-checklist.md",
     "docs\sync-rules.md",
     "docs\test-checklist.md",
     "prompts",
-    "scripts\audit-ai-dev-system.ps1"
+    "scripts\audit-ai-dev-system.ps1",
+    "scripts\setup-codegraph.ps1"
 )
 
 $preserveByDefault = @(

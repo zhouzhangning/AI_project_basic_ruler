@@ -48,6 +48,8 @@ $requiredFiles = @(
     "docs\ai-approval-rules.md",
     "docs\ai-task-template.md",
     "docs\ai-work-log.md",
+    "docs\codegraph-integration.md",
+    "docs\feature-inventory.md",
     "docs\project-memory.md",
     "docs\evolution-rules.md",
     "docs\sync-rules.md",
@@ -56,7 +58,8 @@ $requiredFiles = @(
     "docs\test-checklist.md",
     "scripts\init-ai-dev-system.ps1",
     "scripts\update-ai-dev-system.ps1",
-    "scripts\audit-ai-dev-system.ps1"
+    "scripts\audit-ai-dev-system.ps1",
+    "scripts\setup-codegraph.ps1"
 )
 
 foreach ($file in $requiredFiles) {

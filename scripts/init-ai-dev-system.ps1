@@ -19,7 +19,8 @@ $items = @(
     "docs",
     "prompts",
     "scripts\audit-ai-dev-system.ps1",
-    "scripts\update-ai-dev-system.ps1"
+    "scripts\update-ai-dev-system.ps1",
+    "scripts\setup-codegraph.ps1"
 )
 
 foreach ($item in $items) {
