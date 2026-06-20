@@ -30,8 +30,11 @@
 - `prompts/`：常用提示词模板
 - `scripts/init-ai-dev-system.ps1`：把模板复制到目标项目的一键初始化脚本
 - `scripts/update-ai-dev-system.ps1`：拉取模板更新，并同步到目标项目
+- `scripts/sync-selected-ai-dev-system.ps1`：按功能模块选择性同步到目标项目
+- `scripts/start-ai-dev-system-gui.ps1`：选择性同步的简易图形界面
 - `scripts/audit-ai-dev-system.ps1`：检查模板完整性、文件大小和维护风险
 - `scripts/setup-codegraph.ps1`：检查、安装、配置和初始化 CodeGraph 的辅助脚本
+- `start-ai-dev-system-gui.bat`：双击启动简易同步界面
 
 ## 快速使用
 
@@ -45,6 +48,18 @@
 
 ```powershell
 .\scripts\init-ai-dev-system.ps1 -TargetPath "D:\path\to\your-project" -Overwrite
+```
+
+如果只想同步部分功能，可以双击：
+
+```text
+start-ai-dev-system-gui.bat
+```
+
+或使用命令行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\sync-selected-ai-dev-system.ps1 -TargetPath "D:\path\to\your-project" -Features core-rules,approval,task-prompts
 ```
 
 ## 推荐工作流

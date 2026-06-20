@@ -34,6 +34,9 @@
 
 - `scripts/init-ai-dev-system.ps1`：把基础设施模板复制到目标项目。
 - `scripts/update-ai-dev-system.ps1`：从模板仓库更新目标项目。
+- `scripts/sync-selected-ai-dev-system.ps1`：按功能模块选择性同步到目标项目。
+- `scripts/start-ai-dev-system-gui.ps1`：选择性同步的简易图形界面。
+- `start-ai-dev-system-gui.bat`：双击启动简易同步界面。
 - `docs/sync-rules.md`：定义多电脑、多项目同步规则。
 
 默认策略：
@@ -41,6 +44,7 @@
 - 不覆盖目标项目已有文件。
 - 保留目标项目自己的业务规则和长期记忆。
 - 通用模板只沉淀跨项目适用的规则。
+- 可以只同步需要的功能模块，不必一次复制全套基础设施。
 
 ## 4. 审计与维护
 

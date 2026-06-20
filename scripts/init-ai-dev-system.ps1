@@ -20,6 +20,9 @@ $items = @(
     "prompts",
     "scripts\audit-ai-dev-system.ps1",
     "scripts\update-ai-dev-system.ps1",
+    "scripts\sync-selected-ai-dev-system.ps1",
+    "scripts\start-ai-dev-system-gui.ps1",
+    "start-ai-dev-system-gui.bat",
     "scripts\setup-codegraph.ps1"
 )
 

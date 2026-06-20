@@ -51,6 +51,12 @@ cd AI_project_basic_ruler
 .\scripts\init-ai-dev-system.ps1 -TargetPath "D:\path\to\project"
 ```
 
+如果只需要同步部分功能，可以双击 `start-ai-dev-system-gui.bat`，或使用：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\sync-selected-ai-dev-system.ps1 -TargetPath "D:\path\to\project" -Features core-rules,approval,task-prompts
+```
+
 如果这台电脑需要启用 CodeGraph：
 
 ```powershell
@@ -75,6 +81,7 @@ git pull
 - 已存在文件不会覆盖。
 - 目标项目自己的 `AGENTS.md`、`README-AI.md`、`docs/project-memory.md` 不会被破坏。
 - `.codegraph/` 这类本地索引不进入 Git，同步的是启用方法和规则，不是索引数据。
+- 简易界面和选择性同步脚本默认同样不覆盖已有文件，除非明确选择覆盖。
 
 如果确实要覆盖，必须显式使用：
 

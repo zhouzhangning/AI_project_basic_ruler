@@ -58,8 +58,11 @@ $requiredFiles = @(
     "docs\test-checklist.md",
     "scripts\init-ai-dev-system.ps1",
     "scripts\update-ai-dev-system.ps1",
+    "scripts\sync-selected-ai-dev-system.ps1",
+    "scripts\start-ai-dev-system-gui.ps1",
     "scripts\audit-ai-dev-system.ps1",
-    "scripts\setup-codegraph.ps1"
+    "scripts\setup-codegraph.ps1",
+    "start-ai-dev-system-gui.bat"
 )
 
 foreach ($file in $requiredFiles) {
