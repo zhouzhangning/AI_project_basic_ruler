@@ -68,6 +68,7 @@
 - `review-code.md`：代码审查。
 - `refactor.md`：重构。
 - `write-tests.md`：补测试。
+- `codegraph-usage.md`：CodeGraph 使用判断和常用指令。
 - `start-project.md`：启动新项目。
 - `improve-ai-dev-system.md`：改进基础设施。
 - `add-experience-candidate.md`：提交经验沉淀候选项。
