@@ -115,7 +115,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\setup-codegraph.ps1 -ProjectP
 
 ## 9. 本地 Codex Skills
 
-- `skills/dce-generation`：DCE 项目表格、Excel、Word、实时预览和打包验证工作流。
+- `skills/dce-generation`：DCE 项目表格、Excel、Word、PPT、PDF、实时预览和打包验证工作流。
+- `skills/karpathy-guidelines`：编码 Agent 行为约束，强调先澄清、少改动、少抽象、可验证。
 - `scripts/install-local-skills.ps1`：把基础设施仓库里的 `skills/` 安装到当前电脑的 Codex skills 目录。
 
 使用方式：

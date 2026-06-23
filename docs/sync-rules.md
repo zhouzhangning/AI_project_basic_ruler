@@ -57,7 +57,7 @@ cd AI_project_basic_ruler
 powershell -ExecutionPolicy Bypass -File .\scripts\install-local-skills.ps1
 ```
 
-例如 `skills\dce-generation` 会安装到 `%USERPROFILE%\.codex\skills\dce-generation`，供 Codex 在 DCE 表格/文档生成任务中自动使用。
+例如 `skills\dce-generation`、`skills\karpathy-guidelines` 会安装到 `%USERPROFILE%\.codex\skills`，供 Codex 在对应任务中自动使用。
 
 如果只需要同步部分功能，可以双击 `start-ai-dev-system-gui.bat`，或使用：
 

@@ -34,7 +34,7 @@
 - `scripts/start-ai-dev-system-gui.ps1`：选择性同步的简易图形界面
 - `scripts/audit-ai-dev-system.ps1`：检查模板完整性、文件大小和维护风险
 - `scripts/setup-codegraph.ps1`：检查、安装、配置和初始化 CodeGraph 的辅助脚本
-- `skills/`：可随基础设施仓库同步的本地 Codex skills，例如 `dce-generation`
+- `skills/`：可随基础设施仓库同步的本地 Codex skills，例如 `dce-generation`、`karpathy-guidelines`
 - `scripts/install-local-skills.ps1`：把 `skills/` 下的 skill 安装到本机 Codex skills 目录
 - `start-ai-dev-system-gui.bat`：双击启动简易同步界面
 
@@ -145,4 +145,5 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-local-skills.ps1
 
 当前包含：
 
-- `dce-generation`：DCE 项目表格、Excel、Word、实时预览和打包验证工作流。
+- `dce-generation`：DCE 项目表格、Excel、Word、PPT、PDF、实时预览和打包验证工作流。
+- `karpathy-guidelines`：编码 Agent 行为约束，强调先澄清、少改动、少抽象、可验证。

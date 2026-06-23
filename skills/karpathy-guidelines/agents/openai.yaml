@@ -1,0 +1,4 @@
+interface:
+  display_name: "karpathy-guidelines"
+  short_description: "Surgical, simple, verifiable coding-agent behavior"
+  default_prompt: "Use $karpathy-guidelines to review this coding task for assumptions, overengineering, and verification criteria."
