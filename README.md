@@ -34,6 +34,8 @@
 - `scripts/start-ai-dev-system-gui.ps1`：选择性同步的简易图形界面
 - `scripts/audit-ai-dev-system.ps1`：检查模板完整性、文件大小和维护风险
 - `scripts/setup-codegraph.ps1`：检查、安装、配置和初始化 CodeGraph 的辅助脚本
+- `skills/`：可随基础设施仓库同步的本地 Codex skills，例如 `dce-generation`
+- `scripts/install-local-skills.ps1`：把 `skills/` 下的 skill 安装到本机 Codex skills 目录
 - `start-ai-dev-system-gui.bat`：双击启动简易同步界面
 
 ## 快速使用
@@ -125,3 +127,22 @@ powershell -ExecutionPolicy Bypass -File .\scripts\setup-codegraph.ps1 -InstallC
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\setup-codegraph.ps1 -ProjectPath "D:\path\to\your-project" -InitProject -EnsureGitIgnore
 ```
+
+## 本地 Codex Skills
+
+如果仓库里有 `skills/` 目录，在新电脑拉取后运行：
+
+```powershell
+cd AI_project_basic_ruler
+powershell -ExecutionPolicy Bypass -File .\scripts\install-local-skills.ps1
+```
+
+脚本会把 `skills/` 下的 skill 复制到本机：
+
+```text
+%USERPROFILE%\.codex\skills
+```
+
+当前包含：
+
+- `dce-generation`：DCE 项目表格、Excel、Word、实时预览和打包验证工作流。

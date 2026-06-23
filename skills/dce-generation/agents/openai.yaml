@@ -1,0 +1,4 @@
+interface:
+  display_name: "dce-generation"
+  short_description: "Multi-format DCE document generation workflow"
+  default_prompt: "Use $dce-generation to add or modify generated Excel, Word, PPT, PDF, or DCE preview output safely."

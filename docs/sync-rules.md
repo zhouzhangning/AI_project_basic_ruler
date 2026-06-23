@@ -51,6 +51,14 @@ cd AI_project_basic_ruler
 .\scripts\init-ai-dev-system.ps1 -TargetPath "D:\path\to\project"
 ```
 
+如果模板仓库包含本地 Codex skills，也可以安装到当前电脑：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-local-skills.ps1
+```
+
+例如 `skills\dce-generation` 会安装到 `%USERPROFILE%\.codex\skills\dce-generation`，供 Codex 在 DCE 表格/文档生成任务中自动使用。
+
 如果只需要同步部分功能，可以双击 `start-ai-dev-system-gui.bat`，或使用：
 
 ```powershell
@@ -81,6 +89,7 @@ git pull
 - 已存在文件不会覆盖。
 - 目标项目自己的 `AGENTS.md`、`README-AI.md`、`docs/project-memory.md` 不会被破坏。
 - `.codegraph/` 这类本地索引不进入 Git，同步的是启用方法和规则，不是索引数据。
+- `skills/` 中的是可提交的 skill 模板；每台电脑通过 `install-local-skills.ps1` 安装到本机 Codex skills 目录。
 - 简易界面和选择性同步脚本默认同样不覆盖已有文件，除非明确选择覆盖。
 
 如果确实要覆盖，必须显式使用：

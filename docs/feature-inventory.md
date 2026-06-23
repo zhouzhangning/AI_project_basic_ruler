@@ -113,7 +113,20 @@ powershell -ExecutionPolicy Bypass -File .\scripts\setup-codegraph.ps1 -ProjectP
 
 这些清单用于约束 AI 在打包、发布、测试时必须说明验证范围和剩余风险。
 
-## 9. 当前不包含的能力
+## 9. 本地 Codex Skills
+
+- `skills/dce-generation`：DCE 项目表格、Excel、Word、实时预览和打包验证工作流。
+- `scripts/install-local-skills.ps1`：把基础设施仓库里的 `skills/` 安装到当前电脑的 Codex skills 目录。
+
+使用方式：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-local-skills.ps1
+```
+
+每台新电脑拉取基础设施仓库后执行一次即可。本脚本只复制 `skills/` 下的 skill，不修改具体业务项目。
+
+## 10. 当前不包含的能力
 
 本基础设施项目当前不直接包含：
 
