@@ -7,6 +7,8 @@ description: General document and table generation workflow with DCE project spe
 
 Use this skill for generated document/table work. It is intentionally broader than Excel: apply it to XLSX, DOCX, PPTX, PDF, HTML preview output, template-driven files, embedded images, and DCE-specific generation flows.
 
+This is a project/domain skill. For DCE project development, apply `engineering-standard` first for Spec, scope, quality gate, release discipline, and rule evolution; then apply this skill for DCE-specific implementation details.
+
 ## First Moves
 
 1. Identify the output format and generation path before editing.

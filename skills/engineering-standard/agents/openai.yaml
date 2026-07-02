@@ -1,0 +1,7 @@
+interface:
+  display_name: "Engineering Standard"
+  short_description: "跨项目统一工程规范、质量门禁与规则演进"
+  default_prompt: "Use $engineering-standard to plan and verify this project development task under the shared engineering workflow."
+
+policy:
+  allow_implicit_invocation: true
