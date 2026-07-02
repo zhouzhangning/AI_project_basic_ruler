@@ -69,6 +69,17 @@ def main() -> int:
             if term in text:
                 warnings.append(f"Candidate pool mentions project-specific term: {term}; verify it is only source context, not formal global rule")
 
+    evolution = ROOT / "references" / "rule-evolution.md"
+    if evolution.is_file():
+        evolution_text = read_text(evolution)
+        for phrase in [
+            "D:\\test\\AI_project_basic_ruler\\skills\\engineering-standard",
+            "C:\\Users\\HUAWEI\\.codex\\skills\\engineering-standard",
+            "install-local-skills.ps1",
+        ]:
+            if phrase not in evolution_text:
+                errors.append(f"rule-evolution.md missing source-of-truth phrase: {phrase}")
+
     references_dir = ROOT / "references"
     if references_dir.is_dir():
         for path in references_dir.glob("*.md"):

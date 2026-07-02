@@ -46,3 +46,20 @@ Useful command phrases:
 AI may propose global rule changes, but should not silently add them during unrelated feature work. Global rules need explicit user confirmation or a direct task to update the standard.
 
 After upgrading a candidate, run `scripts/validate_engineering_standard.py`.
+
+## Source Of Truth
+
+Formal upgrades to `engineering-standard` must be written to the infrastructure repository first:
+
+```text
+D:\test\AI_project_basic_ruler\skills\engineering-standard
+```
+
+Do not treat `C:\Users\HUAWEI\.codex\skills\engineering-standard` as the long-term maintenance source. It is an installed runtime copy and may be overwritten by `scripts\install-local-skills.ps1`.
+
+After any formal upgrade:
+
+1. Modify the source skill under `D:\test\AI_project_basic_ruler\skills\engineering-standard`.
+2. Run `scripts\validate_engineering_standard.py`.
+3. Commit the change in `D:\test\AI_project_basic_ruler`.
+4. Run `scripts\install-local-skills.ps1` to refresh the installed Codex skill.

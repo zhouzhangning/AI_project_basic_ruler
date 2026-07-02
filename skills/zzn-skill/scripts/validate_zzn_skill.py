@@ -69,6 +69,17 @@ def main() -> int:
             if status.strip() not in ALLOWED_STATUSES:
                 errors.append(f"Invalid candidate status: {status}")
 
+    evolution = ROOT / "references" / "evolution-rules.md"
+    if evolution.is_file():
+        evolution_text = read_text(evolution)
+        for phrase in [
+            "D:\\test\\AI_project_basic_ruler\\skills",
+            "C:\\Users\\HUAWEI\\.codex\\skills",
+            "install-local-skills.ps1",
+        ]:
+            if phrase not in evolution_text:
+                errors.append(f"evolution-rules.md missing source-of-truth phrase: {phrase}")
+
     print("zzn-skill validation")
     print(f"Root: {ROOT}")
 

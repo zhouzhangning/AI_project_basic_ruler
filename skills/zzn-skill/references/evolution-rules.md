@@ -46,6 +46,24 @@ Does it contain secrets or customer-private information?
 - DCE business/document/release rule: `dce-generation` or DCE `AGENTS.md`
 - One-off context: do not store in formal memory
 
+## Source Of Truth
+
+Formal upgrades must be written to the infrastructure repository first:
+
+```text
+D:\test\AI_project_basic_ruler\skills\zzn-skill
+D:\test\AI_project_basic_ruler\skills\engineering-standard
+```
+
+Do not treat `C:\Users\HUAWEI\.codex\skills` as the long-term maintenance source. It is an installed runtime copy and may be overwritten by `scripts\install-local-skills.ps1`.
+
+After any formal upgrade:
+
+1. Modify the source skill under `D:\test\AI_project_basic_ruler\skills`.
+2. Run the relevant validation script.
+3. Commit the change in `D:\test\AI_project_basic_ruler`.
+4. Run `scripts\install-local-skills.ps1` to refresh the installed Codex skills.
+
 ## Cleanup
 
 Candidates should stay concise. Merge duplicates. Do not keep long chat transcripts.
