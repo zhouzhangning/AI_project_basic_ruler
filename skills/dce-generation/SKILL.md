@@ -18,11 +18,15 @@ Use this skill for generated document/table work. It is intentionally broader th
 ## Format Routing
 
 - **XLSX / Excel tables**: read `references/excel-generation.md`; in DCE inspect `core/excel_exporter.py` and `core/original_far_exporter.py`.
+- **Sales quotation / 报价表**: read `references/sales-quotation.md`; inspect `src/excel_report_editor/core/plugins/sales_quotation/`.
 - **DOCX / Word templates**: read `references/office-zip-generation.md`; in DCE inspect `core/technical_plan/exporter.py`, `docx_builder.py`, and templates under `src/excel_report_editor/templates/technical_plan/`.
 - **PPTX / PowerPoint**: treat as Office Open XML ZIP like DOCX/XLSX; prefer placeholders and relationship-safe media insertion.
-- **PDF output**: generate from source format when possible; if editing PDF directly, preserve text/images carefully and verify page count/content.
+- **PDF output**: read `references/pdf-export.md`; generate from source format when possible; if editing PDF directly, preserve text/images carefully and verify page count/content.
 - **HTML preview**: in DCE inspect `core/technical_plan/html_preview.py` or `core/html_generator.py`; keep preview and exported file aligned.
 - **DCE field mapping**: inspect `core/technical_plan/mapper.py` and `core/models.py` before adding new generated fields.
+- **Excel import failures / drag-drop import**: read `references/import-resilience.md`.
+- **DCE UI changes**: read `references/ui-guidelines.md`.
+- **Build, package, release, Gitee update**: read `references/release-workflow.md`.
 
 ## Core Principles
 
@@ -39,6 +43,11 @@ Use this skill for generated document/table work. It is intentionally broader th
 - `references/dce-generation.md`: DCE-specific source map, validation commands, and known local environment notes.
 - `references/excel-generation.md`: Excel template preservation and image handling patterns, adapted from `excel-advanced-processor`.
 - `references/office-zip-generation.md`: DOCX/PPTX/XLSX ZIP/XML safety checklist.
+- `references/sales-quotation.md`: sales quotation import, finance-detail confirmation, row-height, order, and template invariants.
+- `references/pdf-export.md`: WPS/LibreOffice PDF export behavior and naming rules.
+- `references/import-resilience.md`: shared Excel import fallback chain and drag/drop constraints.
+- `references/release-workflow.md`: official build, versioning, publishing, and Gitee update rules.
+- `references/ui-guidelines.md`: DCE panel layout rules, module sections, and dialog expectations.
 
 ## Reusable Script
 

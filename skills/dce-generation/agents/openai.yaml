@@ -1,4 +1,4 @@
 interface:
-  display_name: "dce-generation"
-  short_description: "Multi-format DCE document generation workflow"
-  default_prompt: "Use $dce-generation to add or modify generated Excel, Word, PPT, PDF, or DCE preview output safely."
+  display_name: "DCE Generation"
+  short_description: "DCE Excel, quotation, PDF, import fallback, and release workflow guidance."
+  default_prompt: "Use $dce-generation to modify DCE generated documents, sales quotations, Excel/PDF exports, import fallback logic, UI panels, or release packages safely."
