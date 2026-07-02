@@ -81,6 +81,16 @@ Do not add rules just because one task failed once.
 4. Human confirmation is required before turning experience into a global rule.
 5. If a rule can be automatically checked, prefer a script.
 
+Use `references/evolution-candidates.md` as the candidate pool for reusable engineering lessons borrowed from projects, incidents, or other skills. Do not silently upgrade candidates into formal rules.
+
+Trigger candidate capture when the user says:
+
+- `沉淀到工程规范候选`
+- `查看工程规范候选`
+- `确认升级工程规范第 N 条`
+- `从 dce-generation 提炼可复用规则`
+- `从 zzn-skill 提炼工程规范规则`
+
 Read `references/rule-evolution.md` before changing this skill or shared templates.
 
 ## Release And Sync
@@ -98,5 +108,6 @@ Read `references/release-and-sync.md` for release and cross-project synchronizat
 
 - `scripts/ai_preflight.py`: checks whether a target project has basic AI onboarding files and reports recommended reads.
 - `scripts/validate_project_rules.py`: checks whether a target project declares engineering-standard layering and avoids mixing project-specific rules into the global layer.
+- `scripts/validate_engineering_standard.py`: checks this skill's structure, candidate statuses, line limits, and likely project-specific leakage.
 
 These scripts are helpers, not substitutes for reading the project.

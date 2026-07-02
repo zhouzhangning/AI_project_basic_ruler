@@ -116,7 +116,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\setup-codegraph.ps1 -ProjectP
 ## 9. 本地 Codex Skills
 
 - `skills/zzn-skill`：个人身份档案、长期工作偏好、常见坑和经验候选进化机制。
-- `skills/engineering-standard`：跨项目统一工程规范，负责 Spec 先行、质量门禁、发布纪律、规则演进和项目间同步边界。
+- `skills/engineering-standard`：跨项目统一工程规范，负责 Spec 先行、质量门禁、发布纪律、工程规则候选进化和项目间同步边界。
 - `skills/dce-generation`：DCE 项目表格、Excel、Word、PPT、PDF、实时预览和打包验证工作流。
 - `skills/karpathy-guidelines`：编码 Agent 行为约束，强调先澄清、少改动、少抽象、可验证。
 - `scripts/install-local-skills.ps1`：把基础设施仓库里的 `skills/` 安装到当前电脑的 Codex skills 目录。

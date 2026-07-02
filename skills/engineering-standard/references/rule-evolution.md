@@ -23,6 +23,26 @@ What complexity does it add?
 - Risky manual sequence: script it.
 - Long explanation: move to references, keep `SKILL.md` concise.
 
+## Candidate Pool
+
+Use `references/evolution-candidates.md` before formalizing new engineering rules.
+
+Allowed statuses:
+
+- `候选`
+- `高频候选`
+- `已升级`
+- `废弃`
+
+Useful command phrases:
+
+- `沉淀到工程规范候选`
+- `查看工程规范候选`
+- `确认升级工程规范第 N 条`
+- `从 <skill-name> 提炼可复用规则`
+
 ## Approval
 
 AI may propose global rule changes, but should not silently add them during unrelated feature work. Global rules need explicit user confirmation or a direct task to update the standard.
+
+After upgrading a candidate, run `scripts/validate_engineering_standard.py`.
