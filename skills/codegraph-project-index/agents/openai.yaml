@@ -1,0 +1,3 @@
+display_name: CodeGraph Project Index
+short_description: Find and use the optional CodeGraph workflow for project indexing and AI codebase onboarding.
+default_prompt: Use CodeGraph to help understand this project, reduce repeated source reading, and inspect structure or impact before code changes.

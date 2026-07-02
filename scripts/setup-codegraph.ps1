@@ -13,6 +13,29 @@ function Test-CommandExists([string]$Name) {
     return $null -ne (Get-Command $Name -ErrorAction SilentlyContinue)
 }
 
+function Get-CodeGraphCommand() {
+    $cmd = Get-Command "codegraph.cmd" -ErrorAction SilentlyContinue
+    if ($cmd) {
+        return $cmd.Source
+    }
+
+    $cmd = Get-Command "codegraph" -ErrorAction SilentlyContinue
+    if ($cmd) {
+        return $cmd.Source
+    }
+
+    return $null
+}
+
+function Invoke-CodeGraph([string[]]$Arguments) {
+    $codegraph = Get-CodeGraphCommand
+    if (-not $codegraph) {
+        throw "codegraph is not available on PATH."
+    }
+
+    & $codegraph @Arguments
+}
+
 function Add-CodeGraphGitIgnore([string]$Root) {
     $gitignore = Join-Path $Root ".gitignore"
     if (-not (Test-Path -LiteralPath $gitignore)) {
@@ -29,7 +52,7 @@ function Add-CodeGraphGitIgnore([string]$Root) {
 }
 
 if ($InstallCli) {
-    if (Test-CommandExists "codegraph") {
+    if (Get-CodeGraphCommand) {
         Write-Host "codegraph is already available."
     } elseif (Test-CommandExists "npm") {
         Write-Host "Installing CodeGraph CLI with npm..."
@@ -39,23 +62,23 @@ if ($InstallCli) {
     }
 }
 
-if (-not (Test-CommandExists "codegraph")) {
+if (-not (Get-CodeGraphCommand)) {
     Write-Host "codegraph is not available on PATH."
     Write-Host "Run with -InstallCli, or install it manually, then open a new terminal."
     exit 0
 }
 
 Write-Host "CodeGraph version:"
-codegraph version
+Invoke-CodeGraph @("version")
 
 if ($DisableTelemetry) {
     Write-Host "Disabling CodeGraph telemetry..."
-    codegraph telemetry off
+    Invoke-CodeGraph @("telemetry", "off")
 }
 
 if ($ConfigureAgents) {
     Write-Host "Configuring detected AI agents..."
-    codegraph install
+    Invoke-CodeGraph @("install", "--yes")
 }
 
 if ($ProjectPath) {
@@ -67,11 +90,11 @@ if ($ProjectPath) {
 
     if ($InitProject) {
         Write-Host "Initializing CodeGraph project index..."
-        codegraph init $resolvedProject
+        Invoke-CodeGraph @("init", $resolvedProject)
     }
 
     Write-Host "Project CodeGraph status:"
-    codegraph status $resolvedProject
+    Invoke-CodeGraph @("status", $resolvedProject)
 }
 
 if (-not $InstallCli -and -not $ConfigureAgents -and -not $InitProject -and -not $EnsureGitIgnore -and -not $DisableTelemetry) {
