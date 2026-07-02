@@ -18,6 +18,9 @@
 通用工程规范和项目专用技能必须分层使用：
 
 ```text
+zzn-skill
+  个人身份档案：用户环境、长期偏好、常见坑和经验进化机制。
+
 engineering-standard
   所有项目统一工程规范：Spec 先行、质量门禁、发布纪律、规则演进、同步边界。
 
@@ -30,6 +33,7 @@ project AGENTS.md
 
 当前基础设施包含：
 
+- `skills/zzn-skill`：个人身份档案、长期偏好和经验候选进化机制。
 - `skills/engineering-standard`：所有项目通用工程规范。
 - `skills/dce-generation`：DCE 项目专用文档、表格、报价、发布工作流。
 - `skills/karpathy-guidelines`：编码 Agent 行为约束。

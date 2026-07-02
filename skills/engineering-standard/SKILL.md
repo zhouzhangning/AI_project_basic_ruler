@@ -7,13 +7,16 @@ description: Unified engineering workflow standard for AI-assisted software deve
 
 Use this skill as the top-level project engineering discipline. It defines how AI should enter a project, turn requests into executable work, validate changes, and evolve reusable rules.
 
-Project-specific skills remain responsible for domain behavior. For DCE work, use this skill first for workflow discipline, then use `dce-generation` for Excel/Word/FAR/quotation/release details.
+Personal identity skills and project-specific skills remain responsible for their own layers. If `zzn-skill` was invoked, treat it as the personal profile layer before this engineering layer. For DCE work, use this skill for workflow discipline, then use `dce-generation` for Excel/Word/FAR/quotation/release details.
 
 ## Operating Model
 
 ```text
 engineering-standard
   Controls: Spec-first, scope, risk, quality gates, logs, release discipline, rule evolution.
+
+personal skill
+  Controls: user's stable environment, preferences, recurring lessons, and memory evolution.
 
 project-specific skill
   Controls: project domain knowledge, file formats, business rules, local commands.

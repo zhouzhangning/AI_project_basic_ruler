@@ -115,6 +115,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\setup-codegraph.ps1 -ProjectP
 
 ## 9. 本地 Codex Skills
 
+- `skills/zzn-skill`：个人身份档案、长期工作偏好、常见坑和经验候选进化机制。
 - `skills/engineering-standard`：跨项目统一工程规范，负责 Spec 先行、质量门禁、发布纪律、规则演进和项目间同步边界。
 - `skills/dce-generation`：DCE 项目表格、Excel、Word、PPT、PDF、实时预览和打包验证工作流。
 - `skills/karpathy-guidelines`：编码 Agent 行为约束，强调先澄清、少改动、少抽象、可验证。
@@ -122,6 +123,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\setup-codegraph.ps1 -ProjectP
 
 分层关系：
 
+- `zzn-skill` 管个人身份、环境、偏好和经验进化。
 - `engineering-standard` 管所有项目通用的工程化工作方式。
 - `dce-generation` 等项目专用 skill 管具体项目的业务规则和文件处理细节。
 - 具体项目的 `AGENTS.md` 只负责声明本项目应该同时使用哪些 skill，以及本项目自己的特殊约束。

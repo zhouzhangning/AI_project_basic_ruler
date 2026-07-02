@@ -1,0 +1,7 @@
+interface:
+  display_name: "ZZN Skill"
+  short_description: "个人身份档案、工作偏好和经验进化机制"
+  default_prompt: "Use $zzn-skill to load my personal working profile before starting this task."
+
+policy:
+  allow_implicit_invocation: true

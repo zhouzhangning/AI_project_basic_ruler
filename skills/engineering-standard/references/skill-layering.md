@@ -5,6 +5,10 @@ Use layered skills so one global standard can improve every project without abso
 ## Layers
 
 ```text
+Personal identity skill
+  zzn-skill
+  User environment, preferences, recurring lessons, and personal memory evolution.
+
 Global engineering skill
   engineering-standard
   Cross-project workflow, quality, Spec, release discipline, sync rules.
@@ -22,9 +26,10 @@ Project entry file
 
 For DCE work:
 
-1. Use `engineering-standard` to decide Spec, scope, quality gate, release safety, and logging.
-2. Use `dce-generation` for Excel, Word, FAR, sales quotation, templates, preview/export consistency, and DCE release commands.
-3. Use DCE `AGENTS.md` for local repository rules and current project constraints.
+1. If the user invoked `zzn-skill`, read its profile first for environment and personal preferences.
+2. Use `engineering-standard` to decide Spec, scope, quality gate, release safety, and logging.
+3. Use `dce-generation` for Excel, Word, FAR, sales quotation, templates, preview/export consistency, and DCE release commands.
+4. Use DCE `AGENTS.md` for local repository rules and current project constraints.
 
 `engineering-standard` must not replace `dce-generation`; it governs how `dce-generation` is applied.
 
