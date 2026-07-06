@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Dev System — Control Center</title>
+<style>
+/* ============================================================
+   全局重置 & 变量
+   ============================================================ */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg-0:#05060f; --bg-1:#0a0c1e; --bg-2:#0f1330;
+  --glass:rgba(15,18,40,.6); --glass-border:rgba(0,240,255,.12);
+  --cyan:#00f0ff; --purple:#7b6cff; --pink:#ff6cb0; --gold:#ffb84d;
+  --green:#4dff88; --red:#ff4d6d; --blue:#4dc4ff;
+  --text:#e0e6f0; --text-dim:#7a8aaa; --text-faint:#4a5a7a;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-0);font-family:'Segoe UI','Microsoft YaHei',sans-serif;color:var(--text);font-size:14px}
+a{color:inherit;text-decoration:none}
+
+/* ============================================================
+   背景粒子层
+   ============================================================ */
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ============================================================
+   主布局
+   ============================================================ */
+#app{position:relative;z-index:1;display:flex;width:100%;height:100%}
+
+/* ===== 侧边导航 ===== */
+#sidebar{
+  width:64px;flex-shrink:0;height:100%;
+  background:rgba(8,10,25,.8);backdrop-filter:blur(20px);
+  border-right:1px solid var(--glass-border);
+  display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:6px;
+  z-index:5;
+}
+.nav-btn{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .25s;border:1px solid transparent;
+  font-size:20px;color:var(--text-faint);position:relative;
+}
+.nav-btn:hover{color:var(--text);background:rgba(0,240,255,.06)}
+.nav-btn.active{
+  color:var(--cyan);background:rgba(0,240,255,.08);
+  border-color:rgba(0,240,255,.2);
+  box-shadow:0 0 16px rgba(0,240,255,.15);
+}
+.nav-btn .tooltip{
+  position:absolute;left:56px;top:50%;transform:translateY(-50%);
+  background:rgba(15,18,40,.95);border:1px solid var(--glass-border);
+  border-radius:6px;padding:4px 12px;font-size:12px;white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity .2s;z-index:10;
+}
+.nav-btn:hover .tooltip{opacity:1}
+.nav-divider{width:32px;height:1px;background:var(--glass-border);margin:8px 0}
+
+/* ===== 主内容区 ===== */
+#main{flex:1;height:100%;overflow-y:auto;overflow-x:hidden;position:relative}
+#main::-webkit-scrollbar{width:4px}
+#main::-webkit-scrollbar-thumb{background:rgba(0,240,255,.2);border-radius:2px}
+.screen{display:none;padding:28px 36px;min-height:100%;animation:fadeIn .4s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== 玻璃面板 ===== */
+.glass{
+  background:var(--glass);border:1px solid var(--glass-border);
+  border-radius:16px;backdrop-filter:blur(16px);
+}
+
+/* ===== 标题样式 ===== */
+.screen-title{font-size:24px;font-weight:300;letter-spacing:1px;margin-bottom:4px}
+.screen-subtitle{font-size:12px;color:var(--text-faint);letter-spacing:2px;margin-bottom:24px}
+
+/* ============================================================
+   Screen 1: Control Center
+   ============================================================ */
+.identity-chain{display:flex;gap:0;align-items:stretch;margin-bottom:28px;flex-wrap:wrap}
+.chain-node{
+  flex:1;min-width:160px;padding:20px;border-radius:14px;
+  background:var(--glass);border:1px solid var(--glass-border);
+  position:relative;transition:all .3s;cursor:default;
+}
+.chain-node:hover{border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,240,255,.08)}
+.chain-node .step-num{font-size:10px;color:var(--text-faint);letter-spacing:2px;margin-bottom:8px}
+.chain-node .step-icon{font-size:28px;margin-bottom:8px}
+.chain-node .step-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.chain-node .step-desc{font-size:11px;color:var(--text-dim);line-height:1.5}
+.chain-arrow{
+  display:flex;align-items:center;justify-content:center;
+  width:32px;flex-shrink:0;color:var(--text-faint);font-size:20px;
+}
+@media(max-width:900px){.chain-arrow{transform:rotate(90deg);width:100%;height:24px}}
+
+.status-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.status-card{
+  padding:18px;border-radius:14px;background:var(--glass);
+  border:1px solid var(--glass-border);transition:all .3s;
+}
+.status-card:hover{border-color:rgba(0,240,255,.25)}
+.status-card .sc-label{font-size:10px;color:var(--text-faint);letter-spacing:1px;margin-bottom:8px}
+.status-card .sc-value{font-size:22px;font-weight:700;margin-bottom:4px}
+.status-card .sc-detail{font-size:11px;color:var(--text-dim)}
+.status-pill{
+  display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;
+  font-weight:600;letter-spacing:.5px;
+}
+.pill-ok{background:rgba(77,255,136,.12);color:var(--green)}
+.pill-warn{background:rgba(255,184,77,.12);color:var(--gold)}
+.pill-no{background:rgba(255,77,109,.12);color:var(--red)}
+
+.startup-flow{padding:24px;border-radius:14px}
+.startup-flow h3{font-size:14px;margin-bottom:16px;color:var(--cyan)}
+.flow-step{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.flow-step:last-child{border-bottom:none}
+.flow-num{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;
+}
+.flow-content{flex:1}
+.flow-title{font-size:13px;font-weight:500}
+.flow-desc{font-size:11px;color:var(--text-dim)}
+.flow-cmd{
+  font-family:'Cascadia Code','Consolas',monospace;font-size:11px;
+  color:var(--cyan);background:rgba(0,240,255,.06);padding:2px 8px;border-radius:4px;
+}
+
+/* ============================================================
+   Screen 2: Skill Universe (3D)
+   ============================================================ */
+#skill-3d-container{width:100%;height:calc(100vh - 80px);border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--glass-border)}
+#skill-3d-container canvas{display:block}
+.skill-overlay{position:absolute;pointer-events:none;z-index:2}
+.skill-overlay.top-left{top:20px;left:20px}
+.skill-overlay.bottom-left{bottom:20px;left:20px;pointer-events:auto}
+.skill-overlay.bottom-right{bottom:20px;right:20px;pointer-events:auto}
+.universe-legend{
+  background:rgba(10,12,28,.75);border:1px solid var(--glass-border);
+  border-radius:10px;padding:14px 18px;backdrop-filter:blur(10px);
+}
+.universe-legend h4{font-size:11px;color:var(--text-faint);margin-bottom:10px;letter-spacing:1px}
+.universe-legend .item{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px}
+.universe-legend .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ============================================================
+   Screen 3: Evolution Pipeline
+   ============================================================ */
+.pipeline-stages{display:flex;gap:0;margin-bottom:28px;flex-wrap:wrap}
+.pipe-stage{
+  flex:1;min-width:140px;padding:16px;border-radius:12px;
+  background:var(--glass);border:1px solid var(--glass-border);
+  text-align:center;position:relative;transition:all .3s;
+}
+.pipe-stage:hover{border-color:var(--cyan)}
+.pipe-stage .ps-icon{font-size:24px;margin-bottom:6px}
+.pipe-stage .ps-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.pipe-stage .ps-count{font-size:20px;font-weight:700;color:var(--cyan)}
+.pipe-stage .ps-desc{font-size:10px;color:var(--text-faint);margin-top:2px}
+.pipe-arrow{display:flex;align-items:center;color:var(--text-faint);font-size:18px;padding:0 4px}
+
+.candidate-list{display:flex;flex-direction:column;gap:12px}
+.candidate-card{
+  padding:18px;border-radius:14px;background:var(--glass);
+  border:1px solid var(--glass-border);transition:all .3s;
+  display:flex;gap:16px;align-items:flex-start;
+}
+.candidate-card:hover{border-color:rgba(0,240,255,.2);transform:translateX(4px)}
+.candidate-card .cc-status{
+  width:40px;height:40px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.candidate-card .cc-body{flex:1}
+.candidate-card .cc-id{font-size:11px;color:var(--text-faint);letter-spacing:1px}
+.candidate-card .cc-title{font-size:14px;font-weight:600;margin:2px 0 6px}
+.candidate-card .cc-meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.candidate-card .cc-meta span{font-size:11px;color:var(--text-dim)}
+.candidate-card .cc-rule{font-size:12px;color:var(--text);line-height:1.6;padding:8px 12px;background:rgba(0,240,255,.04);border-radius:8px;border-left:2px solid var(--cyan)}
+
+/* ============================================================
+   Screen 4: Governance Matrix
+   ============================================================ */
+.gov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.gov-card{
+  padding:20px;border-radius:14px;background:var(--glass);
+  border:1px solid var(--glass-border);transition:all .3s;
+}
+.gov-card:hover{border-color:rgba(0,240,255,.2)}
+.gov-card .gc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.gov-card .gc-title{font-size:14px;font-weight:600}
+.gov-card .gc-icon{font-size:22px}
+.gov-card .gc-items{display:flex;flex-direction:column;gap:8px}
+.gov-item{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.gov-item:last-child{border-bottom:none}
+.gov-item .gi-check{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.gov-item .gi-text{flex:1;color:var(--text-dim)}
+.gov-item .gi-status{font-size:10px;padding:1px 6px;border-radius:8px}
+
+/* ============================================================
+   Screen 5: Command Deck
+   ============================================================ */
+.cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.cmd-card{
+  padding:18px;border-radius:14px;background:var(--glass);
+  border:1px solid var(--glass-border);transition:all .3s;
+}
+.cmd-card:hover{border-color:rgba(0,240,255,.2)}
+.cmd-card .cmd-cat{font-size:10px;color:var(--text-faint);letter-spacing:2px;margin-bottom:6px}
+.cmd-card .cmd-title{font-size:14px;font-weight:600;margin-bottom:12px}
+.cmd-block{
+  background:rgba(0,0,0,.4);border:1px solid rgba(0,240,255,.08);
+  border-radius:8px;padding:12px;margin-bottom:8px;
+  font-family:'Cascadia Code','Consolas',monospace;font-size:11px;
+  position:relative;transition:all .2s;
+}
+.cmd-block:hover{border-color:rgba(0,240,255,.2)}
+.cmd-block .cmd-prompt{color:var(--green)}
+.cmd-block .cmd-text{color:var(--cyan)}
+.cmd-block .cmd-comment{color:var(--text-faint);display:block;margin-top:4px}
+.cmd-copy{
+  position:absolute;top:8px;right:8px;
+  font-size:10px;color:var(--text-faint);cursor:pointer;
+  padding:2px 8px;border-radius:4px;transition:all .2s;
+  border:1px solid transparent;
+}
+.cmd-copy:hover{color:var(--cyan);border-color:rgba(0,240,255,.2)}
+
+/* ============================================================
+   Screen 6: Project Integration
+   ============================================================ */
+.proj-header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.proj-header .proj-icon{font-size:36px}
+.proj-header .proj-name{font-size:22px;font-weight:600}
+.proj-header .proj-path{font-size:12px;color:var(--text-faint);font-family:monospace}
+.integration-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:24px}
+.integ-card{
+  padding:18px;border-radius:14px;background:var(--glass);
+  border:1px solid var(--glass-border);transition:all .3s;
+  display:flex;align-items:center;gap:14px;
+}
+.integ-card:hover{border-color:rgba(0,240,255,.2)}
+.integ-card .ic-icon{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.integ-card .ic-body{flex:1}
+.integ-card .ic-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.integ-card .ic-path{font-size:11px;color:var(--text-faint);font-family:monospace}
+.integ-card .ic-status{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600}
+
+.skill-chain-viz{padding:24px;border-radius:14px}
+.skill-chain-viz h3{font-size:14px;margin-bottom:16px;color:var(--cyan)}
+.chain-viz-step{
+  display:flex;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);
+}
+.chain-viz-step:last-child{border-bottom:none}
+.chain-viz-step .cvs-num{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;
+}
+.chain-viz-step .cvs-body{flex:1}
+.chain-viz-step .cvs-title{font-size:13px;font-weight:500}
+.chain-viz-step .cvs-desc{font-size:11px;color:var(--text-dim);margin-top:2px}
+.chain-viz-step .cvs-cmd{font-family:monospace;font-size:11px;color:var(--cyan);margin-top:4px}
+
+/* ============================================================
+   通用动画
+   ============================================================ */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.pulse{animation:pulse 2s infinite}
+@keyframes glow-pulse{0%,100%{box-shadow:0 0 8px rgba(0,240,255,.1)}50%{box-shadow:0 0 24px rgba(0,240,255,.25)}}
+.glow-pulse{animation:glow-pulse 3s infinite}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div id="app">
+  <!-- ===== 侧边导航 ===== -->
+  <nav id="sidebar">
+    <div class="nav-btn active" data-screen="control" title="Control Center">
+      <span>🛰</span>
+      <span class="tooltip">Control Center</span>
+    </div>
+    <div class="nav-btn" data-screen="universe" title="Skill Universe">
+      <span>🌌</span>
+      <span class="tooltip">Skill Universe</span>
+    </div>
+    <div class="nav-btn" data-screen="evolution" title="Evolution Pipeline">
+      <span>🧬</span>
+      <span class="tooltip">Evolution Pipeline</span>
+    </div>
+    <div class="nav-btn" data-screen="governance" title="Governance Matrix">
+      <span>🛡</span>
+      <span class="tooltip">Governance Matrix</span>
+    </div>
+    <div class="nav-btn" data-screen="command" title="Command Deck">
+      <span>⬡</span>
+      <span class="tooltip">Command Deck</span>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-btn" data-screen="integration" title="Project Integration">
+      <span>🔌</span>
+      <span class="tooltip">Project Integration</span>
+    </div>
+  </nav>
+
+  <!-- ===== 主内容 ===== -->
+  <main id="main">
+
+    <!-- ============================================================
+         Screen 1: Control Center
+         ============================================================ -->
+    <div class="screen active" id="screen-control">
+      <div class="screen-title">AI Control Center</div>
+      <div class="screen-subtitle">IDENTITY → STANDARD → SKILL → EVOLUTION → HEALTH</div>
+
+      <!-- 身份链路 -->
+      <div class="identity-chain">
+        <div class="chain-node" style="border-color:rgba(255,108,176,.2)">
+          <div class="step-num">STEP 01</div>
+          <div class="step-icon">👤</div>
+          <div class="step-title" style="color:var(--pink)">我是谁</div>
+          <div class="step-desc">zzn-skill 个人身份档案<br>环境 · 偏好 · 经验</div>
+        </div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-node" style="border-color:rgba(123,108,255,.2)">
+          <div class="step-num">STEP 02</div>
+          <div class="step-icon">📐</div>
+          <div class="step-title" style="color:var(--purple)">遵循什么规范</div>
+          <div class="step-desc">engineering-standard<br>Spec先行 · 质量门禁 · 发布纪律</div>
+        </div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-node" style="border-color:rgba(0,240,255,.2)">
+          <div class="step-num">STEP 03</div>
+          <div class="step-icon">⚡</div>
+          <div class="step-title" style="color:var(--cyan)">有哪些 Skill</div>
+          <div class="step-desc">dce-generation · karpathy<br>codegraph · 项目专用</div>
+        </div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-node" style="border-color:rgba(77,196,255,.2)">
+          <div class="step-num">STEP 04</div>
+          <div class="step-icon">🧬</div>
+          <div class="step-title" style="color:var(--blue)">经验如何进化</div>
+          <div class="step-desc">候选 → 高频 → 确认 → 升级<br>candidate pool 驱动</div>
+        </div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-node" style="border-color:rgba(77,255,136,.2)">
+          <div class="step-num">STEP 05</div>
+          <div class="step-icon">💚</div>
+          <div class="step-title" style="color:var(--green)">系统是否健康</div>
+          <div class="step-desc">审计脚本 · 完整性检查<br>行数监控 · 反膨胀</div>
+        </div>
+      </div>
+
+      <!-- 状态卡片 -->
+      <div class="status-grid">
+        <div class="status-card">
+          <div class="sc-label">INFRASTRUCTURE VERSION</div>
+          <div class="sc-value" style="color:var(--cyan)">v1.0</div>
+          <div class="sc-detail">3 commits · 工作区干净</div>
+        </div>
+        <div class="status-card">
+          <div class="sc-label">SKILLS INSTALLED</div>
+          <div class="sc-value" style="color:var(--purple)">5 / 5</div>
+          <div class="sc-detail">全部已安装到 .codex/skills</div>
+        </div>
+        <div class="status-card">
+          <div class="sc-label">EXPERIENCE CANDIDATES</div>
+          <div class="sc-value" style="color:var(--gold)">2</div>
+          <div class="sc-detail">2 已升级 · 0 待审</div>
+        </div>
+        <div class="status-card">
+          <div class="sc-label">DCE INTEGRATION</div>
+          <div class="sc-value" style="color:var(--green)">ACTIVE</div>
+          <div class="sc-detail">AGENTS.md · preflight · codegraph</div>
+        </div>
+        <div class="status-card">
+          <div class="sc-label">TOTAL FILES</div>
+          <div class="sc-value">67</div>
+          <div class="sc-detail">11 docs · 9 prompts · 7 scripts · 32 skills</div>
+        </div>
+        <div class="status-card">
+          <div class="sc-label">AUDIT STATUS</div>
+          <div class="sc-value" style="color:var(--green)">PASS</div>
+          <div class="sc-detail">所有必需文件存在</div>
+        </div>
+      </div>
+
+      <!-- 启动链路 -->
+      <div class="glass startup-flow">
+        <h3>🚀 "我是 zzn-skill" 启动链路</h3>
+        <div class="flow-step">
+          <div class="flow-num" style="background:rgba(255,108,176,.15);color:var(--pink)">1</div>
+          <div class="flow-content">
+            <div class="flow-title">加载 zzn-skill</div>
+            <div class="flow-desc">读取个人身份、环境偏好、已知教训</div>
+          </div>
+          <div class="flow-cmd">references/profile.md</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:rgba(123,108,255,.15);color:var(--purple)">2</div>
+          <div class="flow-content">
+            <div class="flow-title">加载 engineering-standard</div>
+            <div class="flow-desc">Spec 先行 · 质量门禁 · 发布纪律 · 规则演进</div>
+          </div>
+          <div class="flow-cmd">SKILL.md + 7 references</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:rgba(0,240,255,.15);color:var(--cyan)">3</div>
+          <div class="flow-content">
+            <div class="flow-title">读取项目 AGENTS.md</div>
+            <div class="flow-desc">项目入口规则 · 特殊约束 · 高风险红线</div>
+          </div>
+          <div class="flow-cmd">AGENTS.md</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:rgba(255,184,77,.15);color:var(--gold)">4</div>
+          <div class="flow-content">
+            <div class="flow-title">Git 状态检查</div>
+            <div class="flow-desc">修改前先查看分支和工作区</div>
+          </div>
+          <div class="flow-cmd">git status --short</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:rgba(77,196,255,.15);color:var(--blue)">5</div>
+          <div class="flow-content">
+            <div class="flow-title">按需加载项目专用 Skill</div>
+            <div class="flow-desc">DCE → dce-generation · 代码理解 → codegraph · 编码约束 → karpathy</div>
+          </div>
+          <div class="flow-cmd">project-specific skills</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:rgba(77,255,136,.15);color:var(--green)">6</div>
+          <div class="flow-content">
+            <div class="flow-title">运行预检（DCE 项目）</div>
+            <div class="flow-desc">确保环境就绪后再开始工作</div>
+          </div>
+          <div class="flow-cmd">python tools/ai_project_preflight.py</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         Screen 2: Skill Universe (3D)
+         ============================================================ -->
+    <div class="screen" id="screen-universe">
+      <div class="screen-title">Skill Universe</div>
+      <div class="screen-subtitle">LAYERED SKILL ARCHITECTURE — CLICK NODES TO EXPLORE</div>
+      <div id="skill-3d-container">
+        <div class="skill-overlay top-left">
+          <div class="universe-legend">
+            <h4>SKILL 分层</h4>
+            <div class="item"><div class="dot" style="background:var(--pink)"></div>zzn-skill · 身份层</div>
+            <div class="item"><div class="dot" style="background:var(--purple)"></div>engineering-standard · 规范层</div>
+            <div class="item"><div class="dot" style="background:var(--cyan)"></div>项目专用 Skill · 领域层</div>
+            <div class="item"><div class="dot" style="background:var(--gold)"></div>AGENTS.md · 入口层</div>
+          </div>
+        </div>
+        <div class="skill-overlay bottom-right" style="font-size:11px;color:var(--text-faint);background:rgba(10,12,28,.75);border:1px solid var(--glass-border);border-radius:8px;padding:8px 14px;backdrop-filter:blur(10px)">
+          拖拽旋转 · 滚轮缩放 · 点击节点查看详情
+        </div>
+        <div id="universe-detail" style="position:absolute;top:0;right:0;width:360px;height:100%;background:rgba(10,12,28,.92);border-left:1px solid var(--glass-border);backdrop-filter:blur(20px);transform:translateX(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);overflow-y:auto;padding:24px;z-index:3">
+          <button onclick="document.getElementById('universe-detail').style.transform='translateX(100%)'" style="position:absolute;top:16px;right:16px;width:30px;height:30px;border:1px solid rgba(255,255,255,.1);border-radius:50%;background:transparent;color:var(--text-dim);cursor:pointer">&times;</button>
+          <div id="universe-detail-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         Screen 3: Evolution Pipeline
+         ============================================================ -->
+    <div class="screen" id="screen-evolution">
+      <div class="screen-title">Evolution Pipeline</div>
+      <div class="screen-subtitle">EXPERIENCE CANDIDATE → HIGH-FREQUENCY → CONFIRMED → UPGRADED → INSTALLED</div>
+
+      <!-- 流水线阶段 -->
+      <div class="pipeline-stages">
+        <div class="pipe-stage" style="border-color:rgba(255,184,77,.2)">
+          <div class="ps-icon">📝</div>
+          <div class="ps-name" style="color:var(--gold)">候选</div>
+          <div class="ps-count">0</div>
+          <div class="ps-desc">出现 1 次 · 记录到候选池</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-stage" style="border-color:rgba(77,196,255,.2)">
+          <div class="ps-icon">⚡</div>
+          <div class="ps-name" style="color:var(--blue)">高频候选</div>
+          <div class="ps-count">0</div>
+          <div class="ps-desc">出现 2 次 · 整理到 project-memory</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-stage" style="border-color:rgba(123,108,255,.2)">
+          <div class="ps-icon">🔍</div>
+          <div class="ps-name" style="color:var(--purple)">确认升级</div>
+          <div class="ps-count">0</div>
+          <div class="ps-desc">3次+ · 人工审核 · 回答6问</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-stage" style="border-color:rgba(0,240,255,.2)">
+          <div class="ps-icon">✅</div>
+          <div class="ps-name" style="color:var(--cyan)">已升级</div>
+          <div class="ps-count">2</div>
+          <div class="ps-desc">写入正式 skill profile</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-stage" style="border-color:rgba(77,255,136,.2)">
+          <div class="ps-icon">📦</div>
+          <div class="ps-name" style="color:var(--green)">已安装</div>
+          <div class="ps-count">5</div>
+          <div class="ps-desc">install-local-skills.ps1 → .codex</div>
+        </div>
+      </div>
+
+      <!-- 候选列表 -->
+      <div class="candidate-list">
+        <div class="candidate-card" style="border-color:rgba(77,255,136,.15)">
+          <div class="cc-status" style="background:rgba(77,255,136,.12)">✅</div>
+          <div class="cc-body">
+            <div class="cc-id">C001</div>
+            <div class="cc-title">PowerShell 中文乱码判断</div>
+            <div class="cc-meta">
+              <span>📊 频次: 3</span>
+              <span>📦 来源: DCE 与基础设施项目多次中文文件读取</span>
+              <span>🌐 适用: 跨项目</span>
+              <span class="status-pill pill-ok">已升级</span>
+            </div>
+            <div class="cc-rule">
+              优先用 <code style="color:var(--cyan)">Get-Content -Encoding UTF8</code> 或 Python UTF-8 读取确认，不要根据默认终端输出直接判断文件损坏。
+            </div>
+            <div style="font-size:11px;color:var(--text-faint);margin-top:6px">📍 已写入 references/profile.md · 验证: 后续中文文件读取减少误判</div>
+          </div>
+        </div>
+
+        <div class="candidate-card" style="border-color:rgba(77,255,136,.15)">
+          <div class="cc-status" style="background:rgba(77,255,136,.12)">✅</div>
+          <div class="cc-body">
+            <div class="cc-id">C002</div>
+            <div class="cc-title">DCE 先工程规范再项目专用 skill</div>
+            <div class="cc-meta">
+              <span>📊 频次: 3</span>
+              <span>📦 来源: DCE 项目开发规范落地</span>
+              <span>🌐 适用: DCE + 可泛化到项目 skill 分层</span>
+              <span class="status-pill pill-ok">已升级</span>
+            </div>
+            <div class="cc-rule">
+              先使用 <code style="color:var(--purple)">engineering-standard</code>，再使用 <code style="color:var(--cyan)">dce-generation</code>，并读取 DCE <code style="color:var(--gold)">AGENTS.md</code>。
+            </div>
+            <div style="font-size:11px;color:var(--text-faint);margin-top:6px">📍 已写入 references/profile.md · 验证: DCE tools/ai_project_preflight.py 通过</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 升级流程说明 -->
+      <div class="glass" style="padding:24px;margin-top:24px;border-radius:14px">
+        <h3 style="font-size:14px;margin-bottom:16px;color:var(--cyan)">🔄 升级审核清单</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">
+          <div style="font-size:12px;color:var(--text-dim);padding:8px 12px;background:rgba(0,240,255,.04);border-radius:8px">❓ 这条规则防止什么重复错误？</div>
+          <div style="font-size:12px;color:var(--text-dim);padding:8px 12px;background:rgba(0,240,255,.04);border-radius:8px">⏰ 什么时候应该触发？</div>
+          <div style="font-size:12px;color:var(--text-dim);padding:8px 12px;background:rgba(0,240,255,.04);border-radius:8px">🌐 是个人/项目/全局工程规则？</div>
+          <div style="font-size:12px;color:var(--text-dim);padding:8px 12px;background:rgba(0,240,255,.04);border-radius:8px">📍 应进入 zzn / engineering / dce / AGENTS？</div>
+          <div style="font-size:12px;color:var(--text-dim);padding:8px 12px;background:rgba(0,240,255,.04);border-radius:8px">⚙️ 能否做成脚本自动检查？</div>
+          <div style="font-size:12px;color:var(--text-dim);padding:8px 12px;background:rgba(0,240,255,.04);border-radius:8px">🔒 是否含密钥或客户隐私？</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         Screen 4: Governance Matrix
+         ============================================================ -->
+    <div class="screen" id="screen-governance">
+      <div class="screen-title">Governance Matrix</div>
+      <div class="screen-subtitle">COMPLIANCE · INTEGRITY · DISCIPLINE</div>
+
+      <div class="gov-grid">
+        <!-- 个人记忆 -->
+        <div class="gov-card">
+          <div class="gc-header">
+            <div class="gc-title">👤 个人记忆</div>
+            <div class="gc-icon" style="color:var(--pink)">zzn-skill</div>
+          </div>
+          <div class="gc-items">
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">身份短语 "我是 zzn-skill"</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">环境配置 (Win/PS/D:\test)</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">编码读取规范</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">长期偏好与教训</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">经验进化机制</div><div class="gi-status pill-ok">OK</div></div>
+          </div>
+        </div>
+
+        <!-- 工程规范 -->
+        <div class="gov-card">
+          <div class="gc-header">
+            <div class="gc-title">📐 工程规范</div>
+            <div class="gc-icon" style="color:var(--purple)">standard</div>
+          </div>
+          <div class="gc-items">
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">Spec 先行</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">质量门禁</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">发布与同步</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">规则演进</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">Skill 分层</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">3 个校验脚本</div><div class="gi-status pill-ok">OK</div></div>
+          </div>
+        </div>
+
+        <!-- 项目规则 -->
+        <div class="gov-card">
+          <div class="gc-header">
+            <div class="gc-title">📋 项目规则</div>
+            <div class="gc-icon" style="color:var(--gold)">AGENTS</div>
+          </div>
+          <div class="gc-items">
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">AGENTS.md (基础设施)</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">CLAUDE.md 适配</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">GEMINI.md 适配</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">.cursorrules 适配</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">README-AI.md</div><div class="gi-status pill-ok">OK</div></div>
+          </div>
+        </div>
+
+        <!-- 审批规则 -->
+        <div class="gov-card">
+          <div class="gc-header">
+            <div class="gc-title">🛡 高风险红线</div>
+            <div class="gc-icon" style="color:var(--red)">approval</div>
+          </div>
+          <div class="gc-items">
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">删除数据需审批</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">依赖变更需审批</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">生产配置/密钥禁触</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">发布/部署需确认</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">Git 历史不可擅改</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">外部消息禁自发</div><div class="gi-status pill-ok">OK</div></div>
+          </div>
+        </div>
+
+        <!-- 校验脚本 -->
+        <div class="gov-card">
+          <div class="gc-header">
+            <div class="gc-title">⚙ 校验脚本</div>
+            <div class="gc-icon" style="color:var(--cyan)">scripts</div>
+          </div>
+          <div class="gc-items">
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">audit-ai-dev-system.ps1</div><div class="gi-status pill-ok">7 scripts</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">validate_zzn_skill.py</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">validate_engineering_standard.py</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">validate_project_rules.py</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">ai_preflight.py</div><div class="gi-status pill-ok">OK</div></div>
+          </div>
+        </div>
+
+        <!-- Git 状态 -->
+        <div class="gov-card">
+          <div class="gc-header">
+            <div class="gc-title">📦 Git 状态</div>
+            <div class="gc-icon" style="color:var(--green)">repo</div>
+          </div>
+          <div class="gc-items">
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">工作区干净</div><div class="gi-status pill-ok">CLEAN</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">3 commits</div><div class="gi-status pill-ok">OK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(255,184,77,.15);color:var(--gold)">!</div><div class="gi-text">最新 commit: enforce skill source</div><div class="gi-status pill-warn">CHECK</div></div>
+            <div class="gov-item"><div class="gi-check" style="background:rgba(77,255,136,.15);color:var(--green)">✓</div><div class="gi-text">commit message 规范</div><div class="gi-status pill-ok">OK</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         Screen 5: Command Deck
+         ============================================================ -->
+    <div class="screen" id="screen-command">
+      <div class="screen-title">Command Deck</div>
+      <div class="screen-subtitle">EXECUTABLE OPERATIONS — COPY & RUN IN POWERSHELL</div>
+
+      <div class="cmd-grid">
+        <!-- Skill 管理 -->
+        <div class="cmd-card">
+          <div class="cmd-cat">SKILL MANAGEMENT</div>
+          <div class="cmd-title">🔧 Skills 安装与校验</div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">cd D:\test\AI_project_basic_ruler</span><br>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">powershell -ExecutionPolicy Bypass -File .\scripts\install-local-skills.ps1</span>
+            <span class="cmd-comment"># 安装 skills/ 到 %USERPROFILE%\.codex\skills</span>
+          </div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">python D:\test\AI_project_basic_ruler\skills\zzn-skill\scripts\validate_zzn_skill.py</span>
+            <span class="cmd-comment"># 校验 zzn-skill 完整性</span>
+          </div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">python D:\test\AI_project_basic_ruler\skills\engineering-standard\scripts\validate_engineering_standard.py</span>
+            <span class="cmd-comment"># 校验工程规范完整性</span>
+          </div>
+        </div>
+
+        <!-- 审计 -->
+        <div class="cmd-card">
+          <div class="cmd-cat">AUDIT & MAINTENANCE</div>
+          <div class="cmd-title">🔍 基础设施审计</div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">cd D:\test\AI_project_basic_ruler</span><br>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">.\scripts\audit-ai-dev-system.ps1</span>
+            <span class="cmd-comment"># 检查文件完整性、行数限制、维护风险</span>
+          </div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">git -C D:\test\AI_project_basic_ruler status --short</span>
+            <span class="cmd-comment"># 查看工作区状态</span>
+          </div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">git -C D:\test\AI_project_basic_ruler log --oneline -5</span>
+            <span class="cmd-comment"># 查看最近提交</span>
+          </div>
+        </div>
+
+        <!-- 经验候选 -->
+        <div class="cmd-card">
+          <div class="cmd-cat">EXPERIENCE EVOLUTION</div>
+          <div class="cmd-title">🧬 候选经验查看</div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">Get-Content -Encoding UTF8 D:\test\AI_project_basic_ruler\skills\zzn-skill\references\experience-candidates.md</span>
+            <span class="cmd-comment"># 查看候选经验池 (UTF-8)</span>
+          </div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">Get-Content -Encoding UTF8 D:\test\AI_project_basic_ruler\skills\zzn-skill\references\profile.md</span>
+            <span class="cmd-comment"># 查看已升级的个人档案</span>
+          </div>
+        </div>
+
+        <!-- 同步 -->
+        <div class="cmd-card">
+          <div class="cmd-cat">PROJECT SYNC</div>
+          <div class="cmd-title">🔄 同步到目标项目</div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">cd D:\test\AI_project_basic_ruler</span><br>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">.\scripts\init-ai-dev-system.ps1 -TargetPath "D:\path\to\project"</span>
+            <span class="cmd-comment"># 初始化（不覆盖已有文件）</span>
+          </div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">.\scripts\update-ai-dev-system.ps1 -TargetPath "D:\path\to\project"</span>
+            <span class="cmd-comment"># 更新已有项目规则</span>
+          </div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">.\start-ai-dev-system-gui.bat</span>
+            <span class="cmd-comment"># GUI 选择性同步</span>
+          </div>
+        </div>
+
+        <!-- DCE 预检 -->
+        <div class="cmd-card">
+          <div class="cmd-cat">DCE PROJECT</div>
+          <div class="cmd-title">🏭 DCE 项目预检</div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">python D:\test\DCE_V1.1_clean\tools\ai_project_preflight.py</span>
+            <span class="cmd-comment"># DCE 项目 AI 预检</span>
+          </div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">git -C D:\test\DCE_V1.1_clean status --short</span>
+            <span class="cmd-comment"># DCE Git 状态</span>
+          </div>
+        </div>
+
+        <!-- CodeGraph -->
+        <div class="cmd-card">
+          <div class="cmd-cat">CODEGRAPH</div>
+          <div class="cmd-title">🕸 代码知识图谱</div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">cd D:\test\AI_project_basic_ruler</span><br>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">.\scripts\setup-codegraph.ps1 -InstallCli -ConfigureAgents -DisableTelemetry</span>
+            <span class="cmd-comment"># 安装配置 CodeGraph CLI</span>
+          </div>
+          <div class="cmd-block">
+            <span class="cmd-copy" onclick="copyCmd(this)">复制</span>
+            <span class="cmd-prompt">PS&gt;</span> <span class="cmd-text">.\scripts\setup-codegraph.ps1 -ProjectPath "D:\test\DCE_V1.1_clean" -InitProject -EnsureGitIgnore</span>
+            <span class="cmd-comment"># 为项目初始化 .codegraph</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         Screen 6: Project Integration
+         ============================================================ -->
+    <div class="screen" id="screen-integration">
+      <div class="screen-title">Project Integration</div>
+      <div class="screen-subtitle">DCE PROJECT — INTEGRATION STATUS</div>
+
+      <div class="proj-header">
+        <div class="proj-icon">🏭</div>
+        <div>
+          <div class="proj-name">DCE 检测归档报告编辑器</div>
+          <div class="proj-path">D:\test\DCE_V1.1_clean</div>
+        </div>
+      </div>
+
+      <!-- 集成状态 -->
+      <div class="integration-grid">
+        <div class="integ-card" style="border-color:rgba(77,255,136,.15)">
+          <div class="ic-icon" style="background:rgba(77,255,136,.12);color:var(--green)">📋</div>
+          <div class="ic-body">
+            <div class="ic-name">AGENTS.md</div>
+            <div class="ic-path">D:\test\DCE_V1.1_clean\AGENTS.md</div>
+          </div>
+          <div class="ic-status pill-ok">已接入</div>
+        </div>
+        <div class="integ-card" style="border-color:rgba(77,255,136,.15)">
+          <div class="ic-icon" style="background:rgba(77,255,136,.12);color:var(--green)">🔍</div>
+          <div class="ic-body">
+            <div class="ic-name">ai_project_preflight.py</div>
+            <div class="ic-path">tools\ai_project_preflight.py</div>
+          </div>
+          <div class="ic-status pill-ok">已接入</div>
+        </div>
+        <div class="integ-card" style="border-color:rgba(77,255,136,.15)">
+          <div class="ic-icon" style="background:rgba(77,255,136,.12);color:var(--green)">🕸</div>
+          <div class="ic-body">
+            <div class="ic-name">.codegraph/</div>
+            <div class="ic-path">.codegraph/</div>
+          </div>
+          <div class="ic-status pill-ok">已初始化</div>
+        </div>
+        <div class="integ-card" style="border-color:rgba(77,255,136,.15)">
+          <div class="ic-icon" style="background:rgba(77,255,136,.12);color:var(--green)">🎯</div>
+          <div class="ic-body">
+            <div class="ic-name">.cursorrules</div>
+            <div class="ic-path">.cursorrules</div>
+          </div>
+          <div class="ic-status pill-ok">已接入</div>
+        </div>
+        <div class="integ-card" style="border-color:rgba(77,255,136,.15)">
+          <div class="ic-icon" style="background:rgba(77,255,136,.12);color:var(--green)">⚙</div>
+          <div class="ic-body">
+            <div class="ic-name">dce-generation skill</div>
+            <div class="ic-path">skills\dce-generation\</div>
+          </div>
+          <div class="ic-status pill-ok">已安装</div>
+        </div>
+        <div class="integ-card" style="border-color:rgba(77,255,136,.15)">
+          <div class="ic-icon" style="background:rgba(77,255,136,.12);color:var(--green)">📐</div>
+          <div class="ic-body">
+            <div class="ic-name">engineering-standard</div>
+            <div class="ic-path">skills\engineering-standard\</div>
+          </div>
+          <div class="ic-status pill-ok">已安装</div>
+        </div>
+      </div>
+
+      <!-- Skill 加载链 -->
+      <div class="glass skill-chain-viz">
+        <h3>🔗 DCE 项目 Skill 加载链路</h3>
+        <div class="chain-viz-step">
+          <div class="cvs-num" style="background:rgba(255,108,176,.15);color:var(--pink)">1</div>
+          <div class="cvs-body">
+            <div class="cvs-title">zzn-skill — 个人身份</div>
+            <div class="cvs-desc">读取环境: Windows / PowerShell / D:\test · 读取偏好: 先理解再改 · 读取教训: 编码乱码处理</div>
+          </div>
+        </div>
+        <div class="chain-viz-step">
+          <div class="cvs-num" style="background:rgba(123,108,255,.15);color:var(--purple)">2</div>
+          <div class="cvs-body">
+            <div class="cvs-title">engineering-standard — 工程规范</div>
+            <div class="cvs-desc">Spec 先行: 先写目标/范围/验收 · 质量门禁: 改完必须验证 · 发布纪律: 说明验证范围和风险</div>
+          </div>
+        </div>
+        <div class="chain-viz-step">
+          <div class="cvs-num" style="background:rgba(0,240,255,.15);color:var(--cyan)">3</div>
+          <div class="cvs-body">
+            <div class="cvs-title">dce-generation — 项目专用</div>
+            <div class="cvs-desc">Excel/Word/PPT/PDF 生成 · 模板占位符 · 嵌入图片 · Office ZIP/XML · FAR/技术方案 · 打包验证</div>
+          </div>
+        </div>
+        <div class="chain-viz-step">
+          <div class="cvs-num" style="background:rgba(255,184,77,.15);color:var(--gold)">4</div>
+          <div class="cvs-body">
+            <div class="cvs-title">DCE AGENTS.md — 项目入口</div>
+            <div class="cvs-desc">本地仓库规则 · 当前项目约束 · DCE 特殊审批 · 打包发布流程</div>
+            <div class="cvs-cmd">git -C "D:\test\DCE_V1.1_clean" status --short</div>
+          </div>
+        </div>
+        <div class="chain-viz-step">
+          <div class="cvs-num" style="background:rgba(77,255,136,.15);color:var(--green)">5</div>
+          <div class="cvs-body">
+            <div class="cvs-title">预检 → 开始工作</div>
+            <div class="cvs-desc">运行预检确保环境就绪 · 按规范执行任务 · 完成后输出改动摘要/测试结果/剩余风险</div>
+            <div class="cvs-cmd">python tools\ai_project_preflight.py</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===== 终端输出面板 (Live Mode) ===== -->
+<div id="terminal-overlay" style="display:none;position:fixed;bottom:0;left:64px;right:0;height:40%;background:rgba(5,6,15,.97);border-top:1px solid var(--glass-border);z-index:50;flex-direction:column;backdrop-filter:blur(20px)">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:rgba(0,240,255,.05);border-bottom:1px solid var(--glass-border)">
+    <span style="font-size:12px;color:var(--cyan);font-family:monospace" id="term-title">TERMINAL</span>
+    <div style="display:flex;gap:8px">
+      <button onclick="clearTerminal()" style="font-size:10px;background:transparent;border:1px solid var(--glass-border);color:var(--text-dim);border-radius:4px;padding:2px 10px;cursor:pointer">清屏</button>
+      <button onclick="closeTerminal()" style="font-size:10px;background:transparent;border:1px solid var(--glass-border);color:var(--red);border-radius:4px;padding:2px 10px;cursor:pointer">关闭</button>
+    </div>
+  </div>
+  <div id="terminal-output" style="flex:1;overflow-y:auto;padding:12px 16px;font-family:'Cascadia Code','Consolas',monospace;font-size:11px;line-height:1.6;color:var(--text-dim)"></div>
+</div>
+
+<!-- ============================================================
+     背景粒子动画
+     ============================================================ -->
+<script>
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+let bgParticles = [];
+
+function resizeBg() {
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+}
+resizeBg();
+window.addEventListener('resize', resizeBg);
+
+for (let i = 0; i < 60; i++) {
+  bgParticles.push({
+    x: Math.random() * bgCanvas.width,
+    y: Math.random() * bgCanvas.height,
+    vx: (Math.random() - 0.5) * 0.15,
+    vy: (Math.random() - 0.5) * 0.15,
+    r: Math.random() * 1.2 + 0.3,
+    a: Math.random() * 0.3 + 0.05
+  });
+}
+
+function animateBg() {
+  bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+  bgParticles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = bgCanvas.width;
+    if (p.x > bgCanvas.width) p.x = 0;
+    if (p.y < 0) p.y = bgCanvas.height;
+    if (p.y > bgCanvas.height) p.y = 0;
+    bgCtx.beginPath();
+    bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    bgCtx.fillStyle = `rgba(0,240,255,${p.a})`;
+    bgCtx.fill();
+  });
+  requestAnimationFrame(animateBg);
+}
+animateBg();
+</script>
+
+<!-- ============================================================
+     导航切换
+     ============================================================ -->
+<script>
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const screen = btn.dataset.screen;
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('screen-' + screen).classList.add('active');
+
+    // 懒加载 3D
+    if (screen === 'universe' && !window._universeLoaded) {
+      loadUniverse3D();
+      window._universeLoaded = true;
+    }
+  });
+});
+
+// 复制命令
+function copyCmd(el) {
+  const block = el.parentElement;
+  const text = block.querySelector('.cmd-text').textContent;
+  const fullCmd = text.replace(/\s+/g, ' ').trim();
+  navigator.clipboard.writeText(fullCmd).then(() => {
+    el.textContent = '已复制';
+    setTimeout(() => { el.textContent = '复制'; }, 1500);
+  });
+}
+</script>
+
+<!-- ============================================================
+     Three.js Skill Universe (懒加载)
+     ============================================================ -->
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const LAYERS = [
+  { id:'zzn', name:'zzn-skill', label:'个人身份档案', color:0xff6cb0, y:0,
+    desc:'用户 zzn 的个人 AI 工作身份。环境偏好、已知教训、经验进化机制。会话启动时最先加载。',
+    tag:'LAYER 1 — IDENTITY',
+    files:['SKILL.md','agents/openai.yaml','references/profile.md','references/evolution-rules.md','references/experience-candidates.md','scripts/validate_zzn_skill.py'],
+    caps:['身份短语: 我是 zzn-skill','环境: Win/PS/D:\\test','编码读取规范','经验候选→升级机制'] },
+  { id:'eng', name:'engineering-standard', label:'工程规范', color:0x7b6cff, y:6,
+    desc:'所有项目统一工程规范。Spec 先行、质量门禁、发布纪律、规则演进、Skill 分层、同步边界。',
+    tag:'LAYER 2 — STANDARDS',
+    files:['SKILL.md','agents/openai.yaml','references/spec-first.md','references/quality-gate.md','references/release-and-sync.md','references/rule-evolution.md','references/skill-layering.md','references/evolution-candidates.md','scripts/ai_preflight.py','scripts/validate_engineering_standard.py','scripts/validate_project_rules.py'],
+    caps:['Spec 先行: 先理解再改','质量门禁: 改完必须验证','发布纪律与同步边界','规则健康演进机制'] },
+  { id:'proj', name:'项目专用 Skill', label:'dce / karpathy / codegraph', color:0x00f0ff, y:12,
+    desc:'项目领域能力层。dce-generation 负责文档生成，karpathy 负责编码约束，codegraph 负责代码理解。',
+    tag:'LAYER 3 — DOMAIN',
+    files:['dce-generation/SKILL.md + 8 refs + 1 script','karpathy-guidelines/SKILL.md','codegraph-project-index/SKILL.md'],
+    caps:['DCE 文档/Excel/Word/PPT/PDF 生成','编码行为约束: 先澄清少改动','CodeGraph 代码知识图谱'] },
+  { id:'agents', name:'AGENTS.md', label:'项目入口', color:0xffb84d, y:18,
+    desc:'项目入口规则文件。声明需要哪些 skill、特殊约束、Git 规则、高风险红线和输出格式。',
+    tag:'LAYER 4 — ENTRY',
+    files:['AGENTS.md','CLAUDE.md','GEMINI.md','.cursorrules','README-AI.md'],
+    caps:['AI 工具通用入口','多 AI 工具适配','高风险红线与审批'] }
+];
+
+// ============================================================
+//   功能模块卫星节点数据
+// ============================================================
+const MODULES = [
+  { id:'m1', name:'AI 协作规则', color:0x00f0ff, angle:0, desc:'通用 Agent 工作规则，约束 AI 默认行为。修改前先理解项目，不凭空假设，小步修改，完成后输出改动摘要和剩余风险。', tag:'MODULE 01', files:['AGENTS.md','CLAUDE.md','GEMINI.md','.cursorrules','README-AI.md'], caps:['修改前先理解项目','不凭空假设结构/接口/业务规则','小步修改避免无审批重构','输出改动摘要+测试结果+风险'] },
+  { id:'m2', name:'审批与风险边界', color:0xff4d6d, angle:36, desc:'必须人工确认的高风险动作：删除、依赖变更、数据库/权限/安全/支付、生产配置、发布部署、Git 历史和大范围重构。', tag:'MODULE 02', files:['docs/ai-approval-rules.md'], caps:['删除文件或数据需审批','依赖安装/升级/移除需审批','生产配置/密钥/支付逻辑禁触','发布/部署/Git历史需确认'] },
+  { id:'m3', name:'初始化与同步', color:0x7b6cff, angle:72, desc:'把基础设施模板复制到目标项目、从模板仓库更新、按功能模块选择性同步。默认不覆盖已有文件。', tag:'MODULE 03', files:['scripts/init-ai-dev-system.ps1','scripts/update-ai-dev-system.ps1','scripts/sync-selected-ai-dev-system.ps1','start-ai-dev-system-gui.bat'], caps:['一键初始化到目标项目','模板更新同步','按功能模块选择性同步','GUI 图形化同步界面'] },
+  { id:'m4', name:'审计与维护', color:0x4dff88, angle:108, desc:'检查基础设施文件完整性和文档长度。定期维护清单和规则增长机制，确保系统健康变大而非臃肿。', tag:'MODULE 04', files:['scripts/audit-ai-dev-system.ps1','docs/maintenance-checklist.md','docs/evolution-rules.md'], caps:['文件完整性检查','文档长度监控','规则健康增长机制','一次性问题不进通用规则'] },
+  { id:'m5', name:'任务模板', color:0xffb84d, angle:144, desc:'可复用任务提示词模板，让任务输入更稳定，减少 AI 对目标、范围、验收和输出格式的误解。', tag:'MODULE 05', files:['prompts/add-feature.md','prompts/fix-bug.md','prompts/review-code.md','prompts/refactor.md','prompts/write-tests.md','prompts/start-project.md','prompts/codegraph-usage.md','prompts/improve-ai-dev-system.md','prompts/add-experience-candidate.md'], caps:['新增功能/修复Bug/代码审查','重构/补测试/启动项目','CodeGraph 使用判断','经验沉淀候选提交'] },
+  { id:'m6', name:'记忆与工作记录', color:0xff6cb0, angle:180, desc:'分层记忆：ai-work-log 记录单次任务，project-memory 记录反复出现的项目经验，通用模板只记录跨项目共性。', tag:'MODULE 06', files:['docs/project-memory.md','docs/ai-work-log.md','docs/ai-task-template.md'], caps:['单次任务过程记录','长期经验与偏好','复杂任务描述模板','分层沉淀规则'] },
+  { id:'m7', name:'CodeGraph 集成', color:0x4dc4ff, angle:216, desc:'可选的代码知识图谱基础设施。用于新项目接手、代码审查、影响分析和复杂修改。不作为强制依赖。', tag:'MODULE 07', files:['docs/codegraph-integration.md','scripts/setup-codegraph.ps1','.gitignore'], caps:['本地代码知识图谱','调用关系与影响分析','减少重复源码阅读','可选非强制依赖'] },
+  { id:'m8', name:'发布与测试检查', color:0xa8ff4d, angle:252, desc:'发布前检查清单和测试检查清单，约束 AI 在打包、发布、测试时必须说明验证范围和剩余风险。', tag:'MODULE 08', files:['docs/release-checklist.md','docs/test-checklist.md'], caps:['发布前检查清单','测试检查清单','验证范围说明','剩余风险声明'] },
+  { id:'m9', name:'本地 Codex Skills', color:0xc47bff, angle:288, desc:'5个可随基础设施仓库同步的本地 Skill，分层管理：身份→规范→领域能力。一键安装到本机 Codex skills 目录。', tag:'MODULE 09', files:['skills/zzn-skill/','skills/engineering-standard/','skills/dce-generation/','skills/karpathy-guidelines/','skills/codegraph-project-index/','scripts/install-local-skills.ps1'], caps:['zzn-skill 个人身份','engineering-standard 工程规范','dce-generation 文档生成','karpathy + codegraph 辅助'] },
+  { id:'m10', name:'边界声明', color:0x6a7a9a, angle:324, desc:'明确当前不包含的能力：具体业务代码、客户资料、.codegraph 索引数据、自动发布脚本、重依赖智能体平台。', tag:'MODULE 10', files:['docs/feature-inventory.md'], caps:['不含具体业务项目代码','不含客户资料/密钥','不含自动发布生产脚本','不含重依赖智能体平台'] }
+];
+
+window.loadUniverse3D = function() {
+  const container = document.getElementById('skill-3d-container');
+  const w = container.clientWidth, h = container.clientHeight;
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x05060f, 0.02);
+
+  const camera = new THREE.PerspectiveCamera(55, w/h, 0.1, 300);
+  camera.position.set(20, 14, 24);
+
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer.setSize(w, h);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+  container.appendChild(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.06;
+  controls.minDistance = 10;
+  controls.maxDistance = 50;
+  controls.maxPolarAngle = Math.PI * 0.55;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.5;
+
+  // 光源
+  scene.add(new THREE.AmbientLight(0x4060ff, 0.3));
+  const dLight = new THREE.DirectionalLight(0x6080ff, 0.4);
+  dLight.position.set(10, 20, 10); scene.add(dLight);
+  const pLight1 = new THREE.PointLight(0x00f0ff, 2, 40);
+  pLight1.position.set(0, 10, 0); scene.add(pLight1);
+  const pLight2 = new THREE.PointLight(0x7b6cff, 1.5, 30);
+  pLight2.position.set(0, 4, 0); scene.add(pLight2);
+
+  // 星空
+  const starGeo = new THREE.BufferGeometry();
+  const starCount = 1500;
+  const starPos = new Float32Array(starCount * 3);
+  const starCol = new Float32Array(starCount * 3);
+  for (let i = 0; i < starCount; i++) {
+    const r = 60 + Math.random() * 50;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(Math.random() * 2 - 1);
+    starPos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+    starPos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    starPos[i*3+2] = r * Math.cos(phi);
+    const c = 0.3 + Math.random() * 0.7;
+    starCol[i*3] = c*0.5; starCol[i*3+1] = c*0.7; starCol[i*3+2] = c;
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  starGeo.setAttribute('color', new THREE.BufferAttribute(starCol, 3));
+  scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ size:0.3, vertexColors:true, transparent:true, opacity:0.5 })));
+
+  // 发光纹理
+  function glowTex() {
+    const c = document.createElement('canvas'); c.width = c.height = 128;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(64,64,0, 64,64,64);
+    g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.2, 'rgba(255,255,255,.5)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,128,128);
+    return new THREE.CanvasTexture(c);
+  }
+  const glowT = glowTex();
+
+  // 层节点
+  const interactives = [];
+  const layerData = [];
+
+  LAYERS.forEach((layer, idx) => {
+    const g = new THREE.Group();
+
+    // 平台
+    const platGeo = new THREE.CylinderGeometry(3.2, 3.2, 0.25, 6);
+    const platMat = new THREE.MeshStandardMaterial({ color:layer.color, transparent:true, opacity:0.1, metalness:0.8, roughness:0.3, emissive:layer.color, emissiveIntensity:0.3 });
+    const plat = new THREE.Mesh(platGeo, platMat);
+    plat.position.y = layer.y; g.add(plat);
+
+    // 边框
+    g.add(new THREE.LineSegments(new THREE.EdgesGeometry(platGeo), new THREE.LineBasicMaterial({ color:layer.color, transparent:true, opacity:0.8 }))).position? null : null;
+    const edgeLine = new THREE.LineSegments(new THREE.EdgesGeometry(platGeo), new THREE.LineBasicMaterial({ color:layer.color, transparent:true, opacity:0.8 }));
+    edgeLine.position.y = layer.y; g.add(edgeLine);
+
+    // 核心球
+    const coreGeo = new THREE.IcosahedronGeometry(0.7, 1);
+    const coreMat = new THREE.MeshStandardMaterial({ color:layer.color, emissive:layer.color, emissiveIntensity:1.5, metalness:0.5, roughness:0.2 });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    core.position.y = layer.y + 1.1;
+    core.userData = { type:'layer', data:layer, baseY: layer.y + 1.1 };
+    interactives.push(core);
+    g.add(core);
+
+    // 发光
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowT, color:layer.color, transparent:true, opacity:0.6, blending:THREE.AdditiveBlending }));
+    glow.scale.set(3.5, 3.5, 1); glow.position.y = layer.y + 1.1; g.add(glow);
+
+    // 标签
+    const lc = document.createElement('canvas'); lc.width = 512; lc.height = 128;
+    const lcx = lc.getContext('2d');
+    lcx.fillStyle = '#' + layer.color.toString(16).padStart(6,'0');
+    lcx.font = 'bold 32px Microsoft YaHei, sans-serif'; lcx.textAlign = 'center';
+    lcx.fillText(layer.name, 256, 45);
+    lcx.font = '18px Microsoft YaHei, sans-serif'; lcx.fillStyle = 'rgba(255,255,255,.5)';
+    lcx.fillText(layer.label, 256, 78);
+    lcx.font = '14px monospace'; lcx.fillStyle = 'rgba(255,255,255,.3)';
+    lcx.fillText(layer.tag, 256, 105);
+    const ls = new THREE.Sprite(new THREE.SpriteMaterial({ map:new THREE.CanvasTexture(lc), transparent:true, opacity:0.9 }));
+    ls.scale.set(5.5, 1.4, 1); ls.position.set(0, layer.y + 2.8, 0); g.add(ls);
+
+    // 粒子环
+    const rGeo = new THREE.BufferGeometry();
+    const rCount = 50;
+    const rPos = new Float32Array(rCount * 3);
+    for (let i = 0; i < rCount; i++) {
+      const a = (i/rCount) * Math.PI * 2;
+      rPos[i*3] = Math.cos(a) * 3.5; rPos[i*3+1] = layer.y + Math.sin(a*3)*0.12; rPos[i*3+2] = Math.sin(a) * 3.5;
+    }
+    rGeo.setAttribute('position', new THREE.BufferAttribute(rPos, 3));
+    const ring = new THREE.Points(rGeo, new THREE.PointsMaterial({ color:layer.color, size:0.12, transparent:true, opacity:0.6, blending:THREE.AdditiveBlending }));
+    g.add(ring);
+    layerData.push({ group:g, ring, core });
+
+    // 层间连线
+    if (idx < LAYERS.length - 1) {
+      const y2 = LAYERS[idx+1].y + 1.1;
+      const lGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, layer.y+1.1, 0), new THREE.Vector3(0, y2, 0)]);
+      scene.add(new THREE.Line(lGeo, new THREE.LineBasicMaterial({ color:0x00f0ff, transparent:true, opacity:0.25 })));
+    }
+
+    scene.add(g);
+  });
+
+  // ===== 功能模块卫星节点 =====
+  const moduleGroups = [];
+  MODULES.forEach((mod) => {
+    const mg = new THREE.Group();
+    const radius = 11;
+    const angleRad = (mod.angle - 90) * Math.PI / 180;
+    const px = Math.cos(angleRad) * radius;
+    const pz = Math.sin(angleRad) * radius;
+    const py = 9 + Math.sin(mod.angle * Math.PI / 180) * 2;
+
+    // 八面体节点
+    const nodeGeo = new THREE.OctahedronGeometry(0.6, 0);
+    const nodeMat = new THREE.MeshStandardMaterial({ color: mod.color, emissive: mod.color, emissiveIntensity: 1.2, metalness: 0.6, roughness: 0.2 });
+    const node = new THREE.Mesh(nodeGeo, nodeMat);
+    node.position.set(px, py, pz);
+    node.userData = { type: 'module', data: mod, basePos: { x: px, y: py, z: pz } };
+    interactives.push(node);
+    mg.add(node);
+
+    // 发光精灵
+    const glow2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowT, color: mod.color, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending }));
+    glow2.scale.set(2.5, 2.5, 1); glow2.position.copy(node.position); mg.add(glow2);
+
+    // 连线到中心塔
+    const connGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(px, py, pz), new THREE.Vector3(0, 9, 0)]);
+    mg.add(new THREE.Line(connGeo, new THREE.LineBasicMaterial({ color: mod.color, transparent: true, opacity: 0.15 })));
+
+    // 模块标签
+    const lc = document.createElement('canvas'); lc.width = 400; lc.height = 80;
+    const lcx = lc.getContext('2d');
+    lcx.fillStyle = '#' + mod.color.toString(16).padStart(6, '0');
+    lcx.font = 'bold 24px Microsoft YaHei, sans-serif'; lcx.textAlign = 'center';
+    lcx.fillText(mod.name, 200, 35);
+    lcx.font = '14px monospace'; lcx.fillStyle = 'rgba(255,255,255,.35)';
+    lcx.fillText(mod.tag, 200, 60);
+    const ls2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(lc), transparent: true, opacity: 0.85 }));
+    ls2.scale.set(4.5, 0.9, 1); ls2.position.set(px, py - 1.3, pz); mg.add(ls2);
+
+    moduleGroups.push({ group: mg, node, glow: glow2, mod });
+    scene.add(mg);
+  });
+
+  // 上升粒子流
+  const flowCount = 60;
+  const fGeo = new THREE.BufferGeometry();
+  const fPos = new Float32Array(flowCount * 3);
+  const fData = [];
+  for (let i = 0; i < flowCount; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const r = Math.random() * 0.4;
+    fPos[i*3] = Math.cos(a)*r; fPos[i*3+1] = Math.random()*20; fPos[i*3+2] = Math.sin(a)*r;
+    fData.push({ a, r, speed: 0.015+Math.random()*0.03, y: fPos[i*3+1] });
+  }
+  fGeo.setAttribute('position', new THREE.BufferAttribute(fPos, 3));
+  const flow = new THREE.Points(fGeo, new THREE.PointsMaterial({ color:0x00f0ff, size:0.1, transparent:true, opacity:0.7, blending:THREE.AdditiveBlending }));
+  scene.add(flow);
+
+  // Raycaster
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  let hovered = null;
+
+  container.addEventListener('pointermove', (e) => {
+    const rect = container.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  });
+
+  container.addEventListener('click', (e) => {
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(interactives);
+    if (hits.length > 0) {
+      const d = hits[0].object.userData.data;
+      const t = hits[0].object.userData.type;
+      if (t === 'module') showModuleDetail(d);
+      else showUniverseDetail(d);
+      controls.autoRotate = false;
+    }
+  });
+
+  function showUniverseDetail(layer) {
+    const ch = '#' + layer.color.toString(16).padStart(6,'0');
+    let html = `
+      <div style="margin-top:40px">
+        <span style="display:inline-block;font-size:10px;letter-spacing:2px;padding:3px 10px;border-radius:4px;background:${ch}22;color:${ch};margin-bottom:12px">${layer.tag}</span>
+        <h2 style="font-size:20px;color:${ch};margin-bottom:8px">${layer.name}</h2>
+        <p style="font-size:13px;color:var(--text-dim);line-height:1.7;margin-bottom:20px">${layer.desc}</p>
+        <h4 style="font-size:11px;color:var(--text-faint);letter-spacing:2px;margin:20px 0 10px">核心能力</h4>
+        <ul style="list-style:none">`;
+    layer.caps.forEach(c => { html += `<li style="font-size:12px;padding:5px 0 5px 14px;position:relative;color:var(--text)"><span style="position:absolute;left:0;top:10px;width:5px;height:5px;border-radius:50%;background:${ch};opacity:.6"></span>${c}</li>`; });
+    html += `</ul><h4 style="font-size:11px;color:var(--text-faint);letter-spacing:2px;margin:20px 0 10px">文件 (${layer.files.length})</h4><ul style="list-style:none">`;
+    layer.files.forEach(f => { html += `<li style="font-size:12px;padding:5px 0;color:var(--text-dim);border-bottom:1px solid rgba(255,255,255,.04)">📄 ${f}</li>`; });
+    html += `</ul></div>`;
+    document.getElementById('universe-detail-content').innerHTML = html;
+    document.getElementById('universe-detail').style.transform = 'translateX(0)';
+  }
+
+  function showModuleDetail(mod) {
+    const ch = '#' + mod.color.toString(16).padStart(6, '0');
+    let html = `
+      <div style="margin-top:40px">
+        <span style="display:inline-block;font-size:10px;letter-spacing:2px;padding:3px 10px;border-radius:4px;background:${ch}22;color:${ch};margin-bottom:12px">${mod.tag}</span>
+        <h2 style="font-size:20px;color:${ch};margin-bottom:8px">${mod.name}</h2>
+        <p style="font-size:13px;color:var(--text-dim);line-height:1.7;margin-bottom:20px">${mod.desc}</p>
+        <h4 style="font-size:11px;color:var(--text-faint);letter-spacing:2px;margin:20px 0 10px">核心能力</h4>
+        <ul style="list-style:none">`;
+    mod.caps.forEach(c => { html += `<li style="font-size:12px;padding:5px 0 5px 14px;position:relative;color:var(--text)"><span style="position:absolute;left:0;top:10px;width:5px;height:5px;border-radius:50%;background:${ch};opacity:.6"></span>${c}</li>`; });
+    html += `</ul><h4 style="font-size:11px;color:var(--text-faint);letter-spacing:2px;margin:20px 0 10px">相关文件 (${mod.files.length})</h4><ul style="list-style:none">`;
+    mod.files.forEach(f => { html += `<li style="font-size:12px;padding:5px 0;color:var(--text-dim);border-bottom:1px solid rgba(255,255,255,.04)">📄 ${f}</li>`; });
+    html += `</ul></div>`;
+    document.getElementById('universe-detail-content').innerHTML = html;
+    document.getElementById('universe-detail').style.transform = 'translateX(0)';
+  }
+
+  // 动画
+  const clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+
+    layerData.forEach(({ core, ring }, i) => {
+      if (core) { core.position.y = core.userData.baseY + Math.sin(t*0.8 + i)*0.2; core.rotation.y = t*0.3; core.rotation.x = t*0.15; }
+      if (ring) { ring.rotation.y = t * 0.2 * (i%2===0 ? 1 : -1); }
+    });
+
+    // 模块卫星浮动+旋转
+    moduleGroups.forEach(({ node, glow }, i) => {
+      if (node) {
+        const base = node.userData.basePos;
+        node.position.y = base.y + Math.sin(t*0.6 + i*0.5)*0.3;
+        node.rotation.y = t * 0.5; node.rotation.z = t * 0.3;
+        glow.position.y = node.position.y;
+      }
+    });
+
+    const positions = flow.geometry.attributes.position.array;
+    for (let i = 0; i < flowCount; i++) {
+      fData[i].y += fData[i].speed;
+      if (fData[i].y > 20) fData[i].y = 0;
+      positions[i*3+1] = fData[i].y;
+      positions[i*3] = Math.cos(fData[i].a + t*0.5) * fData[i].r;
+      positions[i*3+2] = Math.sin(fData[i].a + t*0.5) * fData[i].r;
+    }
+    flow.geometry.attributes.position.needsUpdate = true;
+
+    pLight1.intensity = 2 + Math.sin(t*1.5)*0.5;
+    pLight2.intensity = 1.5 + Math.sin(t*1.2+1)*0.3;
+
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(interactives);
+    if (hits.length > 0) {
+      if (hovered !== hits[0].object) {
+        if (hovered) hovered.scale.setScalar(1);
+        hovered = hits[0].object; hovered.scale.setScalar(1.3);
+        container.style.cursor = 'pointer';
+      }
+    } else {
+      if (hovered) { hovered.scale.setScalar(1); hovered = null; }
+      container.style.cursor = 'default';
+    }
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // 适配
+  window.addEventListener('resize', () => {
+    const w2 = container.clientWidth, h2 = container.clientHeight;
+    camera.aspect = w2/h2; camera.updateProjectionMatrix();
+    renderer.setSize(w2, h2);
+  });
+};
+</script>
+
+<!-- ============================================================
+     Live Mode — 实时数据 + 命令执行 (需 server.py 运行)
+     ============================================================ -->
+<script>
+(function() {
+  const API_BASE = (window.location.port === '8765' || window.location.port === '5000')
+    ? '' : null;
+
+  if (!API_BASE) {
+    console.log('[Dashboard] 静态模式 — python dashboard/server.py 以启用实时数据');
+    return;
+  }
+
+  console.log('[Dashboard] Live 模式已激活');
+
+  // ----- 实时状态刷新 -----
+  async function refreshStatus() {
+    try {
+      const r = await fetch('/api/status');
+      const d = await r.json();
+      document.querySelectorAll('.status-card').forEach(card => {
+        const label = card.querySelector('.sc-label')?.textContent || '';
+        const val = card.querySelector('.sc-value');
+        const detail = card.querySelector('.sc-detail');
+        if (!val) return;
+        if (label.includes('VERSION')) {
+          val.textContent = d.git.dirty ? 'DIRTY' : 'CLEAN';
+          val.style.color = d.git.dirty ? 'var(--gold)' : 'var(--green)';
+          detail.textContent = (d.git.last_commit || '—').substring(0, 40);
+        }
+        if (label.includes('AUDIT')) {
+          val.textContent = d.dce_integration.all_connected ? 'PASS' : 'FAIL';
+          val.style.color = d.dce_integration.all_connected ? 'var(--green)' : 'var(--red)';
+        }
+      });
+    } catch(e) {}
+  }
+  refreshStatus();
+  setInterval(refreshStatus, 30000);
+
+  // ----- 终端 -----
+  window.openTerminal = function(title) {
+    const ov = document.getElementById('terminal-overlay');
+    document.getElementById('term-title').textContent = 'TERMINAL — ' + (title||'');
+    document.getElementById('terminal-output').innerHTML = '';
+    ov.style.display = 'flex';
+  };
+  window.closeTerminal = function() {
+    document.getElementById('terminal-overlay').style.display = 'none';
+  };
+  window.clearTerminal = function() {
+    document.getElementById('terminal-output').innerHTML = '';
+  };
+  window.termLog = function(text, style) {
+    const out = document.getElementById('terminal-output');
+    const el = document.createElement('div');
+    el.textContent = text;
+    if (style) el.style.cssText = style;
+    out.appendChild(el);
+    out.scrollTop = out.scrollHeight;
+  };
+
+  // ----- 执行脚本 (SSE流) -----
+  window.runApiScript = async function(script, title) {
+    openTerminal(title||script);
+    termLog(`$ ${script}`, 'color:var(--cyan)');
+    termLog('');
+
+    try {
+      const r = await fetch('/api/run-script', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({script})
+      });
+      if (!r.ok) {
+        const err = await r.json();
+        termLog('ERROR: ' + (err.error||'Unknown'), 'color:var(--red)');
+        return;
+      }
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+      while (true) {
+        const {done, value} = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, {stream:true});
+        const lines = buf.split('\n');
+        buf = lines.pop()||'';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const msg = JSON.parse(line.slice(6));
+            if (msg.type==='output') termLog(msg.text);
+            else if (msg.type==='done') {
+              termLog('');
+              termLog('[exit code: '+msg.exit_code+']', msg.exit_code===0?'color:var(--green)':'color:var(--red)');
+            }
+          } catch(e){}
+        }
+      }
+    } catch(e) {
+      termLog('连接失败: '+e.message, 'color:var(--red)');
+    }
+  };
+
+  window.ENABLE_LIVE = true;
+  console.log('[Dashboard] Live mode ready — 服务器已连接');
+})();
+</script>
+
+<!-- ============================================================
+     Command Deck 执行按钮 — 始终显示，静态模式下提示启动服务
+     ============================================================ -->
+<script>
+(function() {
+  const scriptMap = {
+    'install-local-skills.ps1': 'scripts/install-local-skills.ps1',
+    'validate_zzn_skill.py': 'skills/zzn-skill/scripts/validate_zzn_skill.py',
+    'validate_engineering_standard.py': 'skills/engineering-standard/scripts/validate_engineering_standard.py',
+    'audit-ai-dev-system.ps1': 'scripts/audit-ai-dev-system.ps1',
+    'ai_project_preflight.py': 'D:/test/DCE_V1.1_clean/tools/ai_project_preflight.py',
+  };
+
+  // Toast 提示
+  function showToast(msg, color) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;'
+      + 'padding:10px 24px;border-radius:8px;font-size:12px;font-family:monospace;backdrop-filter:blur(12px);'
+      + 'transition:opacity .4s;pointer-events:none;'
+      + 'color:' + (color||'var(--gold)') + ';background:rgba(5,6,15,.92);'
+      + 'border:1px solid ' + (color||'var(--gold)') + ';';
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2500);
+  }
+
+  document.querySelectorAll('#screen-command .cmd-block').forEach(block => {
+    const cmdText = block.querySelector('.cmd-text')?.textContent || '';
+    let apiScript = null;
+    for (const [key, val] of Object.entries(scriptMap)) {
+      if (cmdText.includes(key)) { apiScript = val; break; }
+    }
+    if (!apiScript) return;
+
+    const isLive = !!window.ENABLE_LIVE;
+
+    const btn = document.createElement('button');
+    btn.textContent = isLive ? '▶ 执行' : '▶ 离线';
+    btn.title = isLive ? '点击执行脚本' : '请先启动 server.py 以启用执行功能';
+    btn.style.cssText = 'position:absolute;bottom:8px;right:8px;font-size:10px;'
+      + 'background:' + (isLive ? 'rgba(0,240,255,.08)' : 'rgba(255,180,60,.08)') + ';'
+      + 'border:1px solid ' + (isLive ? 'rgba(0,240,255,.2)' : 'rgba(255,180,60,.2)') + ';'
+      + 'color:' + (isLive ? 'var(--cyan)' : 'var(--gold)') + ';'
+      + 'border-radius:4px;padding:2px 10px;cursor:pointer;transition:all .2s';
+    btn.onmouseenter = () => btn.style.background = isLive ? 'rgba(0,240,255,.15)' : 'rgba(255,180,60,.15)';
+    btn.onmouseleave = () => btn.style.background = isLive ? 'rgba(0,240,255,.08)' : 'rgba(255,180,60,.08)';
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      if (isLive && window.runApiScript) {
+        window.runApiScript(apiScript, cmdText.substring(0,50));
+      } else {
+        showToast('⚠ 请先启动服务: python dashboard\\server.py  → 访问 http://127.0.0.1:8765');
+      }
+    };
+    block.style.position = 'relative';
+    block.style.paddingBottom = '32px';
+    block.appendChild(btn);
+  });
+
+  console.log('[Dashboard] Command Deck 按钮已注入: '
+    + (window.ENABLE_LIVE ? 'Live 模式' : '静态模式'));
+})();
+</script>
+
+</body>
+</html>

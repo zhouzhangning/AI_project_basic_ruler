@@ -1,0 +1,276 @@
+{
+  "generated_at": "2026-07-02T14:58:03.848206",
+  "generator": "generate-dashboard-data.py",
+  "project": {
+    "name": "AI Dev System",
+    "version": "v1.0",
+    "path": "D:\\test\\AI_project_basic_ruler"
+  },
+  "structure": {
+    "total_files": 70,
+    "skills": 32,
+    "docs": 11,
+    "prompts": 9,
+    "scripts": 8,
+    "configs": 49
+  },
+  "skills": [
+    {
+      "name": "codegraph-project-index",
+      "title": "---",
+      "description": "name: codegraph-project-index",
+      "path": "skills\\codegraph-project-index",
+      "files": [
+        "SKILL.md",
+        "agents\\openai.yaml"
+      ],
+      "file_count": 2,
+      "ref_count": 0,
+      "script_count": 0,
+      "refs": [],
+      "scripts": [],
+      "agents": [
+        "openai.yaml"
+      ]
+    },
+    {
+      "name": "dce-generation",
+      "title": "---",
+      "description": "name: dce-generation",
+      "path": "skills\\dce-generation",
+      "files": [
+        "SKILL.md",
+        "agents\\openai.yaml",
+        "references\\dce-generation.md",
+        "references\\excel-generation.md",
+        "references\\import-resilience.md",
+        "references\\office-zip-generation.md",
+        "references\\pdf-export.md",
+        "references\\release-workflow.md",
+        "references\\sales-quotation.md",
+        "references\\ui-guidelines.md",
+        "scripts\\excel_template_processor.py"
+      ],
+      "file_count": 11,
+      "ref_count": 8,
+      "script_count": 1,
+      "refs": [
+        "dce-generation.md",
+        "excel-generation.md",
+        "import-resilience.md",
+        "office-zip-generation.md",
+        "pdf-export.md",
+        "release-workflow.md",
+        "sales-quotation.md",
+        "ui-guidelines.md"
+      ],
+      "scripts": [
+        "excel_template_processor.py"
+      ],
+      "agents": [
+        "openai.yaml"
+      ]
+    },
+    {
+      "name": "engineering-standard",
+      "title": "---",
+      "description": "name: engineering-standard",
+      "path": "skills\\engineering-standard",
+      "files": [
+        "SKILL.md",
+        "agents\\openai.yaml",
+        "references\\evolution-candidates.md",
+        "references\\quality-gate.md",
+        "references\\release-and-sync.md",
+        "references\\rule-evolution.md",
+        "references\\skill-layering.md",
+        "references\\spec-first.md",
+        "scripts\\ai_preflight.py",
+        "scripts\\validate_engineering_standard.py",
+        "scripts\\validate_project_rules.py"
+      ],
+      "file_count": 11,
+      "ref_count": 6,
+      "script_count": 3,
+      "refs": [
+        "evolution-candidates.md",
+        "quality-gate.md",
+        "release-and-sync.md",
+        "rule-evolution.md",
+        "skill-layering.md",
+        "spec-first.md"
+      ],
+      "scripts": [
+        "ai_preflight.py",
+        "validate_engineering_standard.py",
+        "validate_project_rules.py"
+      ],
+      "agents": [
+        "openai.yaml"
+      ]
+    },
+    {
+      "name": "karpathy-guidelines",
+      "title": "---",
+      "description": "name: karpathy-guidelines",
+      "path": "skills\\karpathy-guidelines",
+      "files": [
+        "SKILL.md",
+        "agents\\openai.yaml"
+      ],
+      "file_count": 2,
+      "ref_count": 0,
+      "script_count": 0,
+      "refs": [],
+      "scripts": [],
+      "agents": [
+        "openai.yaml"
+      ]
+    },
+    {
+      "name": "zzn-skill",
+      "title": "---",
+      "description": "name: zzn-skill",
+      "path": "skills\\zzn-skill",
+      "files": [
+        "SKILL.md",
+        "agents\\openai.yaml",
+        "references\\evolution-rules.md",
+        "references\\experience-candidates.md",
+        "references\\profile.md",
+        "scripts\\validate_zzn_skill.py"
+      ],
+      "file_count": 6,
+      "ref_count": 3,
+      "script_count": 1,
+      "refs": [
+        "evolution-rules.md",
+        "experience-candidates.md",
+        "profile.md"
+      ],
+      "scripts": [
+        "validate_zzn_skill.py"
+      ],
+      "agents": [
+        "openai.yaml"
+      ]
+    }
+  ],
+  "experience": {
+    "total": 1,
+    "candidate_count": 1,
+    "upgraded_count": 0,
+    "candidates": [
+      {
+        "id": "C001 - PowerShell 中文乱码判断",
+        "rules": [],
+        "status": "candidate"
+      }
+    ],
+    "upgraded": []
+  },
+  "git": {
+    "dirty": true,
+    "dirty_files": [
+      "?? dashboard/",
+      "?? scripts/generate-dashboard-data.py"
+    ],
+    "branch": "main",
+    "commit_count": 10,
+    "last_commit": "fad8945 enforce skill source of truth workflow",
+    "recent_commits": [
+      "fad8945 enforce skill source of truth workflow",
+      "64710e4 add engineering standard evolution candidates",
+      "6d7cf11 add zzn personal identity skill",
+      "feafe2e add engineering standard skill",
+      "b7f6e5a Add CodeGraph project index skill"
+    ]
+  },
+  "docs": {
+    "count": 11,
+    "docs": [
+      "ai-approval-rules.md",
+      "ai-task-template.md",
+      "ai-work-log.md",
+      "codegraph-integration.md",
+      "evolution-rules.md",
+      "feature-inventory.md",
+      "maintenance-checklist.md",
+      "project-memory.md",
+      "release-checklist.md",
+      "sync-rules.md",
+      "test-checklist.md"
+    ]
+  },
+  "prompts": {
+    "count": 9,
+    "prompts": [
+      "add-experience-candidate.md",
+      "add-feature.md",
+      "codegraph-usage.md",
+      "fix-bug.md",
+      "improve-ai-dev-system.md",
+      "refactor.md",
+      "review-code.md",
+      "start-project.md",
+      "write-tests.md"
+    ]
+  },
+  "scripts": {
+    "count": 8,
+    "scripts": [
+      "audit-ai-dev-system.ps1",
+      "generate-dashboard-data.py",
+      "init-ai-dev-system.ps1",
+      "install-local-skills.ps1",
+      "setup-codegraph.ps1",
+      "start-ai-dev-system-gui.ps1",
+      "sync-selected-ai-dev-system.ps1",
+      "update-ai-dev-system.ps1"
+    ]
+  },
+  "integration": {
+    "project": "DCE 检测归档报告编辑器",
+    "path": "D:\\test\\DCE_V1.1_clean",
+    "items": [
+      {
+        "key": "agents",
+        "label": "DCE 项目入口规则",
+        "path": "D:\\test\\DCE_V1.1_clean\\AGENTS.md",
+        "exists": true,
+        "status": "connected"
+      },
+      {
+        "key": "preflight",
+        "label": "AI 预检脚本",
+        "path": "D:\\test\\DCE_V1.1_clean\\tools\\ai_project_preflight.py",
+        "exists": true,
+        "status": "connected"
+      },
+      {
+        "key": "codegraph",
+        "label": "代码知识图谱",
+        "path": "D:\\test\\DCE_V1.1_clean\\.codegraph",
+        "exists": true,
+        "status": "connected"
+      },
+      {
+        "key": "cursor",
+        "label": "Cursor 规则",
+        "path": "D:\\test\\DCE_V1.1_clean\\.cursorrules",
+        "exists": true,
+        "status": "connected"
+      }
+    ],
+    "all_connected": true,
+    "codex_skills_installed": [
+      ".system",
+      "codegraph-project-index",
+      "dce-generation",
+      "engineering-standard",
+      "karpathy-guidelines",
+      "zzn-skill"
+    ],
+    "codex_skills_count": 6
+  }
+}
